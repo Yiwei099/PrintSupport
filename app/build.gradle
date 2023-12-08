@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.eiviayw.printsupport'
-    compileSdk 33
+    compileSdk rootProject.compileSdkVersion
 
     defaultConfig {
         applicationId "com.eiviayw.printsupport"
-        minSdk 24
-        targetSdk 33
+        minSdk rootProject.minSdkVersion
+        targetSdk rootProject.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
