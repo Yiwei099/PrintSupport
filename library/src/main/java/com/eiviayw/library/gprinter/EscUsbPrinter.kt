@@ -1,37 +1,34 @@
 package com.eiviayw.library.gprinter
 
 import android.content.Context
-import com.eiviayw.library.base.BaseParam
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import com.eiviayw.library.bean.Result
 import com.eiviayw.library.bean.param.CommandParam
 import com.eiviayw.library.bean.param.GraphicParam
 import com.gprinter.bean.PrinterDevices
-import com.gprinter.io.EthernetPort
-import com.gprinter.io.PortManager
+import com.gprinter.io.UsbPort
 import com.gprinter.utils.CallbackListener
 import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
 import kotlinx.coroutines.*
 
-
 /**
- * 指路：https://github.com/Yiwei099
- *
  * Created with Android Studio.
  * @Author: YYW
- * @Date: 2023-12-08 22:41
+ * @Date: 2023-12-09 16:43
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
- * 佳博SDK-Net
- * 打印完需要断开链接，否则由于端口杯占用的缘故，其他设备无法与此打印机建立通信
+ * 佳博SDK-USB
+ * USB与Net的逻辑区别就在于打印完不需要立马断开链接，一般只有USB断开时才断开
  */
-class EscNetPrinter(
-    private val mContext:Context,
-    private val ipAddress:String,
-    private val port:Int = 9100
-) : BaseGPrinter(tag = "EscNetPrinter") {
-
+class EscUsbPrinter(
+    private val mContext: Context,
+    private val key: String
+) : BaseGPrinter(tag = "EscUsbPrinter") {
     private var failureTimes = 0
-    private var printJob:Job? = null
+    private val usbService by lazy { mContext.getSystemService(Context.USB_SERVICE) as UsbManager }
+
+    private var printJob: Job? = null
 
     override fun cancelJob(){
         super.cancelJob()
@@ -39,7 +36,6 @@ class EscNetPrinter(
         printJob = null
     }
 
-    override fun createPort(): PortManager = EthernetPort(getPrinterDevice())
     private suspend fun startPrint(){
         getMissionQueue().peekFirst()?.let {param->
             val result = when(param){
@@ -69,14 +65,10 @@ class EscNetPrinter(
 
     private suspend fun missionSuccess() {
         failureTimes = 0
-        if (isMissionEmpty()) {
-            printFinish()
-        } else {
+        if (!isMissionEmpty()) {
             removeHeaderMission()
             if (!isMissionEmpty()) {
                 startPrint()
-            } else {
-                printFinish()
             }
         }
     }
@@ -90,17 +82,12 @@ class EscNetPrinter(
         }
     }
 
-    private fun printFinish() {
-        failureTimes = 0
-        getPrinterPort()?.closePort()
-        cancelJob()
-    }
+    override fun createPort() = UsbPort(getPrinterDevice())
 
     override fun createPrinterDevice(): PrinterDevices = PrinterDevices.Build()
         .setContext(mContext)
-        .setConnMethod(ConnMethod.WIFI)
-        .setIp(ipAddress)
-        .setPort(port)
+        .setConnMethod(ConnMethod.USB)
+        .setUsbDevice(getUSBPrinter())
         .setCommand(Command.ESC)
         .setCallbackListener(object : CallbackListener {
             override fun onConnecting() {
@@ -129,6 +116,40 @@ class EscNetPrinter(
             override fun onDisconnect() {
                 cancelJob()
             }
+
         })
         .build()
+
+    private fun getUSBPrinter(): UsbDevice? {
+        val split = key.split("-")
+        if (split.size < 3) {
+            return null
+        }
+        val deviceList = usbService.deviceList
+        val vID = split[0]
+        val pID = split[1]
+        val usbSerialNumber = split[2]
+        val iterator = deviceList.values.iterator()
+        while (iterator.hasNext()) {
+            val it = iterator.next()
+            if (vID == it.vendorId.toString()
+                && pID == it.productId.toString()
+            ) {
+                if (usbService.hasPermission(it)) {
+                    if (it.serialNumber == usbSerialNumber) {
+                        //芯烨存在多台打印机的vID与pID都是相同的情况，甚至是序列号也一样，所以部分情况下无法确定为一的打印机
+                        recordLog("打印机${key}已授予权限")
+                        return it
+                    }
+                } else {
+                    recordLog("打印机${key}正在申请权限")
+//                    markRequestingPermission(it)
+                    return null
+                }
+            }
+        }
+        recordLog("没找到${key}打印机")
+        return null
+    }
+
 }

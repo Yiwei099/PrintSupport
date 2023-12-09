@@ -1,6 +1,5 @@
 package com.eiviayw.library.base
 
-import android.content.Context
 import android.util.Log
 
 /**
@@ -13,13 +12,29 @@ import android.util.Log
  */
 open class BasePrinter(
     private val openLog:Boolean = true,
-    private val tag:String = ""
+    private val tag:String = "",
+    private val maxRetryTimes:Int = 5
 ){
 
+    /**
+     * 记录日志
+     * @param msg 内容
+     */
     protected fun recordLog(msg:String){
         if (openLog){
             Log.d(tag,msg)
         }
+    }
+
+    /**
+     * 是否已达到最大重试次数
+     * @param times 当前次数
+     * @return true-已达到；false-未达到
+     */
+    protected fun isMaxRetry(times:Int) = times == maxRetryTimes
+
+    companion object{
+        const val UPDATE_TIMER_DELAY = 1000L
     }
 
     interface ConnectState{

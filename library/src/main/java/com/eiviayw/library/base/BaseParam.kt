@@ -7,6 +7,7 @@ package com.eiviayw.library.base
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  */
 open class BaseParam(
-    val index:Int = 1,
-    val count:Int = 1,
+    val id:String = "",//唯一标识
+    val index:Int = 1,//序号
+    val count:Int = 1,//总数
 )

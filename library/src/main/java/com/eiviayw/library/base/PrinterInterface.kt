@@ -8,7 +8,7 @@ package com.eiviayw.library.base
  * @Date: 2023-12-08 23:47
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  */
-interface NetPrinterInterface {
+interface PrinterInterface {
 
     fun addMission(mission:BaseParam)
 }

@@ -13,11 +13,15 @@ import com.eiviayw.library.base.BaseParam
  */
 class GraphicParam(
     val bitmapData: ByteArray,//图像数据
-    val bitmapHeight:Int = 0,
+    private val bitmapHeight:Int = 0,
     val onceLength:Int = 500,
     private val criticalHeight:Int = 1500,
     val graphicQuality:Int = 100,//图像质量：0～100
 ):BaseParam(){
 
+    /**
+     * 是否需要切割
+     * @return true-需要；false-不需要
+     */
     fun needSubsection() = bitmapHeight > criticalHeight
 }
