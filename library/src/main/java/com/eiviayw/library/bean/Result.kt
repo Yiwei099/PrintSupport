@@ -9,7 +9,7 @@ package com.eiviayw.library.bean
  */
 data class Result(
     var code:Int = SUCCESS,
-    var msg:String = "",
+    var msg:String? = "",
 ){
 
     fun isSuccess() = code == SUCCESS

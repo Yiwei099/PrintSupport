@@ -22,7 +22,7 @@ import kotlinx.coroutines.*
  * @Date: 2023-12-08 22:41
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  * 佳博SDK-Net
- * 打印完需要断开链接，否则由于端口杯占用的缘故，其他设备无法与此打印机建立通信
+ * 打印完需要断开链接，否则由于端口被占用的缘故，其他设备无法与此打印机建立通信
  */
 class EscNetPrinter(
     private val mContext:Context,
@@ -104,6 +104,7 @@ class EscNetPrinter(
         .setCommand(Command.ESC)
         .setCallbackListener(object : CallbackListener {
             override fun onConnecting() {
+                getOnConnectListener()?.invoke(Result())
                 if (printJob == null){
                     printJob = getMyScope().launch {
                         withContext(Dispatchers.IO){

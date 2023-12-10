@@ -1,6 +1,12 @@
 package com.eiviayw.library.base
 
 import android.util.Log
+import com.eiviayw.library.bean.Result
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import java.util.*
+import java.util.concurrent.LinkedBlockingDeque
+import kotlin.concurrent.fixedRateTimer
 
 /**
  * 指路：https://github.com/Yiwei099
@@ -14,7 +20,22 @@ open class BasePrinter(
     private val openLog:Boolean = true,
     private val tag:String = "",
     private val maxRetryTimes:Int = 5
-){
+):PrinterInterface{
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private var timer: Timer? = null
+    private val mission by lazy { LinkedBlockingDeque<BaseParam>() }
+
+    //<editor-fold desc="回调函数">
+    /**
+     * 连接状态监听
+     */
+    private var connectListener:((Result)->Unit)? = null
+
+    /**
+     * 执行状态监听
+     */
+    private var printListener:((BaseParam?, Result)->Unit)? = null
+    //</editor-fold desc="回调函数">
 
     /**
      * 记录日志
@@ -32,9 +53,53 @@ open class BasePrinter(
      * @return true-已达到；false-未达到
      */
     protected fun isMaxRetry(times:Int) = times == maxRetryTimes
+    protected fun getMyScope() = scope
+
+    protected fun startTimer() {
+        if (timer != null) {
+            recordLog("timer is running")
+            return
+        }
+        timer = fixedRateTimer(daemon =  false, period =  0, initialDelay = UPDATE_TIMER_DELAY) {
+            if (!isMissionEmpty()) {
+                handlerTimerDo()
+            }
+        }
+    }
+
+    private fun cancelTimer(){
+        timer?.cancel()
+        timer = null
+    }
+
+    /**
+     * 销毁打印机
+     */
+    open fun onDestroy(){
+        cancelTimer()
+        recordLog("printer onDestroy")
+    }
+
+    open fun handlerTimerDo(){
+
+    }
 
     companion object{
+        /**
+         * 定时器间隔时间
+         */
         const val UPDATE_TIMER_DELAY = 1000L
+    }
+
+    protected fun getOnConnectListener() = connectListener
+    protected fun getOnPrintListener() = printListener
+
+    protected fun setOnConnectListener(l:(Result)->Unit){
+        connectListener = l
+    }
+
+    protected fun setOnPrintListener(l:(BaseParam?, Result)->Unit){
+        printListener = l
     }
 
     interface ConnectState{
@@ -43,4 +108,41 @@ open class BasePrinter(
             const val FAILURE = 0
         }
     }
+
+    //<editor-fold desc="任务队列操作API">
+    /**
+     * 添加任务到队列中
+     * @param mission 任务
+     */
+    override fun addMission(mission: BaseParam) {
+        this.mission.addLast(mission)
+        startTimer()
+        recordLog("成功添加${mission.id}")
+    }
+
+    /**
+     * 获取任务队列
+     * @return 任务队列
+     */
+    protected fun getMissionQueue() = mission
+
+    /**
+     * 任务队列是否已空
+     * @return true-已空；false-还有任务
+     */
+    protected fun isMissionEmpty() = mission.isEmpty()
+
+    /**
+     * 移除队列头部元素(已执行完毕的队列)
+     */
+    protected fun removeHeaderMission(){
+        try {
+            mission.removeFirst()
+        }catch (e:Exception){
+            recordLog("removeHeaderMission failure = ${e.message}")
+        }
+    }
+
+    protected fun getHeaderMission() = mission.peekFirst()
+    //</editor-fold desc="任务队列操作API">
 }

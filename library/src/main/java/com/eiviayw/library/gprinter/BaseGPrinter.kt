@@ -22,21 +22,18 @@ import kotlin.concurrent.fixedRateTimer
  * @Author: YYW
  * @Date: 2023-12-09 15:10
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
+ * 可与佳博SDK通讯的打印机：
+ * 佳博
+ * 芯烨
+ * Epson
+ * Bixolon(必胜龙)
+ * Element
  */
 abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterface {
     private var portManager: PortManager? = null
     private val devices by lazy { createPrinterDevice() }
 
-    private val mission by lazy { LinkedBlockingDeque<BaseParam>() }
-
     private var job: Job? = null
-    private var timer: Timer? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
-
-    //<editor-fold desc="回调函数">
-    private var connectListener:((Int,String)->Unit)? = null
-    private var printListener:((BaseParam,Result)->Unit)? = null
-    //</editor-fold desc="回调函数">
 
     private suspend fun working(){
         try {
@@ -48,39 +45,27 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             setPrinterPort(createPort())
             getPrinterPort()?.openPort()
         } catch (e: Exception) {
-            getOnConnectListener()?.invoke(ConnectState.FAILURE,e.message ?: "")
+            getOnConnectListener()?.invoke(Result(Result.FAILURE,"连接异常：${e.message}"))
         }
     }
+
     abstract fun createPrinterDevice(): PrinterDevices
     abstract fun createPort():PortManager
-
-    protected fun getOnConnectListener() = connectListener
-    protected fun getOnPrintListener() = printListener
 
     private fun setPrinterPort(port:PortManager){
         portManager = port
     }
     protected fun getPrinterPort() = portManager
     protected fun getPrinterDevice() = devices
-    protected fun getMissionQueue() = mission
-    protected fun isMissionEmpty() = mission.isEmpty()
-    protected fun removeHeaderMission(){
-        try {
-            mission.removeFirst()
-        }catch (e:Exception){
-            recordLog("removeHeaderMission failure = ${e.message}")
-        }
-    }
-    protected fun getMyScope() = scope
 
-    override fun addMission(mission: BaseParam) {
-        this.mission.addLast(mission)
-        startTimer()
+    override fun handlerTimerDo() {
+        super.handlerTimerDo()
+        startJob()
     }
 
     private fun startJob() {
         if (job == null) {
-            job = scope.launch {
+            job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
                     working()
                 }
@@ -93,26 +78,9 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         job = null
     }
 
-    protected fun startTimer() {
-        if (timer != null) {
-            recordLog("timer is running")
-            return
-        }
-        timer = fixedRateTimer(daemon =  false, period =  0, initialDelay = UPDATE_TIMER_DELAY) {
-            if (!isMissionEmpty()) {
-                startJob()
-            }
-        }
-    }
-
-    protected fun cancelTimer(){
-        timer?.cancel()
-        timer = null
-    }
-
-    fun onDestroy(){
+    override fun onDestroy(){
+        super.onDestroy()
         cancelJob()
-        cancelTimer()
     }
 
     //<editor-fold desc= "打印数据发送方式">
