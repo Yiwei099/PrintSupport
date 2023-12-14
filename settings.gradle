@@ -20,8 +20,9 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven { url 'https://jitpack.io' }
     }
 }
 rootProject.name = "PrintSupport"
 include ':app'
-include ':library'
+include ':print'
