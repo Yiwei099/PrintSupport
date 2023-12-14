@@ -62,8 +62,9 @@ abstract class BaseEpsonPrinter(
         p3: String?
     ) {
         if (p1 == Epos2CallbackCode.CODE_SUCCESS) {
-            recordLog("打印成功")
-            getOnPrintListener()?.invoke(getHeaderMission(), Result())
+            val headerMission = getHeaderMission()
+            recordLog("打印成功：$headerMission")
+            getOnPrintListener()?.invoke(headerMission, Result())
             printSuccess()
         } else {
             printFailure()
@@ -94,16 +95,16 @@ abstract class BaseEpsonPrinter(
     private suspend fun working() {
         val result = Result()
         try {
-            mPrinter.connect(interfaceType + target, Printer.PARAM_DEFAULT)
+            mPrinter.connect(getPrinterTarget(), Printer.PARAM_DEFAULT)
             recordLog("连接成功")
             startPrint()
         } catch (e: Epos2Exception) {
             recordLog("链接异常 - ${e.errorStatus}")
             result.code = Result.FAILURE
             result.msg = "链接异常 - ${e.errorStatus}"
-        }finally {
+        } finally {
             getOnConnectListener()?.invoke(result)
-            if (!result.isSuccess()){
+            if (!result.isSuccess()) {
                 //连接失败必须取消并置空 Job。否则下次无法正常启动打印流程
                 cancelJob()
             }
@@ -114,12 +115,14 @@ abstract class BaseEpsonPrinter(
      * 打印
      */
     private fun startPrint() {
-        if (printJob == null) {
-            printJob = getMyScope().launch {
-                withContext(Dispatchers.IO) {
-                    getMissionQueue().peekFirst()?.let {
-                        handleMission(it)
-                    }
+        if (printJob != null) {
+            printJob?.cancel()
+            printJob = null
+        }
+        printJob = getMyScope().launch {
+            withContext(Dispatchers.IO) {
+                getMissionQueue().peekFirst()?.let {
+                    handleMission(it)
                 }
             }
         }
@@ -129,7 +132,7 @@ abstract class BaseEpsonPrinter(
      * 处理任务
      * @param mission 打印任务
      */
-    open fun handleMission(mission: BaseParam) {
+    open suspend fun handleMission(mission: BaseParam) {
         when (mission) {
             is GraphicParam -> {
                 //图像模式
@@ -139,6 +142,7 @@ abstract class BaseEpsonPrinter(
             is CommandParam -> {
                 //指令模式
             }
+
             else -> {
                 //未支持的模式
             }
@@ -152,6 +156,7 @@ abstract class BaseEpsonPrinter(
     private fun sendDataByGraphicParam(param: GraphicParam) {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         try {
+            mPrinter.beginTransaction()
             mPrinter.addImage(
                 dataBitmap,
                 0,
@@ -171,7 +176,7 @@ abstract class BaseEpsonPrinter(
         } catch (e: Exception) {
             val msg = e.message
             recordLog("sendDataByGraphicParam trow Exception = $msg")
-            getOnPrintListener()?.invoke(param, Result(Result.FAILURE,msg))
+            getOnPrintListener()?.invoke(param, Result(Result.FAILURE, msg))
         } finally {
             dataBitmap.recycle()
         }
@@ -180,7 +185,7 @@ abstract class BaseEpsonPrinter(
     /**
      * 打印成功
      */
-    open fun printSuccess(){
+    open fun printSuccess() {
         failureTimes = 0
         if (isMissionEmpty()) {
             disconnect()
@@ -197,15 +202,16 @@ abstract class BaseEpsonPrinter(
     /**
      * 打印失败
      */
-    open fun printFailure(){
+    open fun printFailure() {
         failureTimes += 1
-        recordLog("打印失败")
-        getOnPrintListener()?.invoke(getHeaderMission(), Result(Result.FAILURE))
+        val headerMission = getHeaderMission()
+        recordLog("打印失败：$headerMission")
+        getOnPrintListener()?.invoke(headerMission, Result(Result.FAILURE))
 
-        if (isMaxRetry(failureTimes)){
+        if (isMaxRetry(failureTimes)) {
             //超过重试次数走 Success 流程只是为了执行下一个任务
             printSuccess()
-        }else{
+        } else {
             //继续重试
             startPrint()
         }
@@ -218,13 +224,13 @@ abstract class BaseEpsonPrinter(
         val result = Result()
         try {
             mPrinter.clearCommandBuffer()
-            if (USB != interfaceType){
+            if (USB != interfaceType) {
                 mPrinter.disconnect()
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             result.code = Result.FAILURE
             result.msg = "断开连接异常：${e.message}"
-        }finally {
+        } finally {
             getOnConnectListener()?.invoke(result)
         }
     }
@@ -241,7 +247,7 @@ abstract class BaseEpsonPrinter(
     /**
      * 暂停当前打印流程
      */
-    private fun cancelJob(){
+    private fun cancelJob() {
         job?.cancel()
         job = null
         printJob?.cancel()
@@ -252,6 +258,8 @@ abstract class BaseEpsonPrinter(
         super.onDestroy()
         cancelJob()
     }
+
+    fun getPrinterTarget() = interfaceType + target
 
     companion object {
         const val USB = "USB:"

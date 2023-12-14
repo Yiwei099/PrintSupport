@@ -63,6 +63,8 @@ open class BasePrinter(
         timer = fixedRateTimer("", false, 0, UPDATE_TIMER_DELAY) {
             if (!isMissionEmpty()) {
                 handlerTimerDo()
+            }else{
+                recordLog("don't have mission")
             }
         }
     }
