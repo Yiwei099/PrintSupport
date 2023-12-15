@@ -29,14 +29,48 @@
             android:id="@+id/rbNet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Net   "
-            android:checked="true"/>
+            android:checked="true"
+            android:text="Net   " />
 
         <RadioButton
             android:id="@+id/rbUsb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Usb   " />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/tvPrinterTypeHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="打印机类型："
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/rgPrinterType"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/rgPrinterType" />
+
+    <RadioGroup
+        android:id="@+id/rgPrinterType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@id/tvPrinterTypeHint"
+        app:layout_constraintTop_toBottomOf="@id/rgInterface">
+
+        <RadioButton
+            android:id="@+id/rbEsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="收据   " />
+
+        <RadioButton
+            android:id="@+id/rbTsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="标签   " />
 
     </RadioGroup>
 
@@ -56,9 +90,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="192.168.100.12"
-        android:textColor="@color/black"
         android:imeOptions="actionDone"
         android:inputType="phone"
+        android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/etTimes"
         app:layout_constraintStart_toStartOf="parent"
@@ -70,13 +104,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="1"
-        android:textColor="@color/black"
         android:imeOptions="actionDone"
         android:inputType="number"
+        android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/rgInterface"
         app:layout_constraintStart_toEndOf="@id/tvCopiesHint"
-        app:layout_constraintTop_toBottomOf="@id/rgInterface"
+        app:layout_constraintTop_toBottomOf="@id/rgPrinterType"
         tools:text="2" />
 
     <Button
@@ -91,20 +125,20 @@
         android:id="@+id/btDestroy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="销毁缓存打印机"
         android:layout_marginStart="4dp"
+        android:text="销毁缓存打印机"
         app:layout_constraintStart_toEndOf="@id/btPrint"
-        app:layout_constraintTop_toTopOf="@id/btPrint"/>
+        app:layout_constraintTop_toTopOf="@id/btPrint" />
 
     <LinearLayout
         android:id="@+id/llUsb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_marginStart="4dp"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etKey"
-        android:paddingBottom="10dp">
+        app:layout_constraintTop_toBottomOf="@id/etKey">
 
         <Button
             android:id="@+id/btUsbDevice"
@@ -116,7 +150,7 @@
             android:id="@+id/rgUsbDevice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:orientation="vertical" />
     </LinearLayout>
 
 

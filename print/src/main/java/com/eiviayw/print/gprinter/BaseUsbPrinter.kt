@@ -24,14 +24,9 @@ import kotlinx.coroutines.withContext
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  * 佳博SDK-USB
  */
-class EscUsbPrinter(
-    private val mContext: Context,
-    private val vID: Int,
-    private val pID: Int,
-    private val serialNumber: String = ""
-) : BaseGPrinter(tag = "EscUsbPrinter") {
+abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
     private var failureTimes = 0
-    private val usbService by lazy { mContext.getSystemService(Context.USB_SERVICE) as UsbManager }
+    private val usbService by lazy { getContext().getSystemService(Context.USB_SERVICE) as UsbManager }
 
     private var printJob: Job? = null
 
@@ -46,7 +41,13 @@ class EscUsbPrinter(
             val result = when (param) {
                 is GraphicParam -> {
                     //图像模式
-                    sendDataByGraphicParam(param)
+                    if (commandType() == Command.ESC){
+                        sendEscDataByGraphicParam(param)
+                    }else if (commandType() == Command.TSC){
+                        sendTscDataByGraphicParam(param)
+                    }else{
+                        Result()
+                    }
                 }
 
                 is CommandParam -> {
@@ -109,10 +110,10 @@ class EscUsbPrinter(
     }
 
     override fun createPrinterDevice(): PrinterDevices = PrinterDevices.Build()
-        .setContext(mContext)
+        .setContext(getContext())
         .setConnMethod(ConnMethod.USB)
         .setUsbDevice(getUSBPrinter())
-        .setCommand(Command.ESC)
+        .setCommand(commandType())
         .setCallbackListener(object : CallbackListener {
             override fun onConnecting() {
 
@@ -150,8 +151,8 @@ class EscUsbPrinter(
         val iterator = deviceList.values.iterator()
         while (iterator.hasNext()) {
             val it = iterator.next()
-            if (vID == it.vendorId
-                && pID == it.productId
+            if (getDeviceVID() == it.vendorId
+                && getDevicePID() == it.productId
                 && mateSerialNumber(it.serialNumber)
             ) {
                 //SDK内部会帮我们请求权限，所以这里无需关心权限问题
@@ -163,12 +164,16 @@ class EscUsbPrinter(
     }
 
     private fun mateSerialNumber(s: String?): Boolean {
-        return TextUtils.isEmpty(serialNumber) || serialNumber == s
+        return TextUtils.isEmpty(getDeviceSerialNumber()) || getDeviceSerialNumber() == s
     }
 
     override fun toString(): String {
-        return "EscUsbPrinter(vID=$vID, pID=$pID, serialNumber='$serialNumber')"
+        return "EscUsbPrinter(vID=${getDeviceVID()}, pID=${getDevicePID()}, serialNumber='${getDeviceSerialNumber()}')"
     }
 
-
+    abstract fun commandType(): Command
+    abstract fun getContext(): Context
+    abstract fun getDeviceVID(): Int
+    abstract fun getDevicePID(): Int
+    open fun getDeviceSerialNumber() = ""
 }

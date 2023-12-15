@@ -12,10 +12,13 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.eiviayw.drawingsupport.label.LabelProvide
 import com.eiviayw.print.bean.param.GraphicParam
 import com.eiviayw.print.gprinter.BaseGPrinter
-import com.eiviayw.print.gprinter.EscNetPrinter
-import com.eiviayw.print.gprinter.EscUsbPrinter
+import com.eiviayw.print.gprinter.EscNetGPrinter
+import com.eiviayw.print.gprinter.EscUsbGPrinter
+import com.eiviayw.print.gprinter.TscNetGPrinter
+import com.eiviayw.print.gprinter.TscUsbGPrinter
 import com.eiviayw.printsupport.BuildConfig
 import com.eiviayw.printsupport.PrintDataProvide
 import com.eiviayw.printsupport.R
@@ -33,13 +36,13 @@ import com.eiviayw.printsupport.databinding.ActivityGprinterBinding
  */
 class GPrinterActivity : AppCompatActivity() {
     private val bitmapData by lazy { PrintDataProvide.getInstance().getBitmapArray() }
+    private val tscBitmapData by lazy { LabelProvide.getInstance().getTscBitmapArray() }
     private var interfaceType: Int = 0
     private var printerTag = ""
     private var printer: BaseGPrinter? = null
     private val viewBinding by lazy { ActivityGprinterBinding.inflate(layoutInflater) }
 
-    private var usbPathIndex = 1000
-    private val usbPathMap by lazy { mutableMapOf<Int,String>() }
+    private var isEsc = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +72,14 @@ class GPrinterActivity : AppCompatActivity() {
                     initIP("")
                     USB
                 }
+            }
+
+            rgPrinterType.setOnCheckedChangeListener { group, checkedId ->
+                isEsc = checkedId == R.id.rbEsc
+                printer?.onDestroy()
+                printer = null
+                printerTag = ""
+                showToast("旧的打印机已被销毁")
             }
 
             btPrint.setOnClickListener {
@@ -140,10 +151,15 @@ class GPrinterActivity : AppCompatActivity() {
     private fun getPrintCopies() = viewBinding.etTimes.text.toString().toInt()
 
     private fun startPrintByNet() {
-        destroyCachePrinter(newPrinter = EscNetPrinter(this, getPrinterKey()))
+        destroyCachePrinter(
+            newPrinter = if (isEsc) EscNetGPrinter(
+                this,
+                getPrinterKey()
+            ) else TscNetGPrinter(this, getPrinterKey())
+        )
         val copies = getPrintCopies()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicParam(bitmapData).apply {
+            printer?.addMission(GraphicParam(getPrintData()).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
                 this.index = index
@@ -155,17 +171,27 @@ class GPrinterActivity : AppCompatActivity() {
         val split = usbKey.split("-")
         destroyCachePrinter(
             newTag = usbKey,
-            newPrinter = EscUsbPrinter(this, split[0].toInt(), split[1].toInt())
+            newPrinter = if (isEsc) EscUsbGPrinter(
+                this,
+                split[0].toInt(),
+                split[1].toInt()
+            ) else TscUsbGPrinter(this, split[0].toInt(), split[1].toInt())
         )
 
         val copies = getPrintCopies()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicParam(bitmapData).apply {
+            printer?.addMission(GraphicParam(getPrintData()).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
                 this.index = index
             })
         }
+    }
+
+    private fun getPrintData() = if (isEsc){
+        bitmapData
+    }else{
+        tscBitmapData
     }
 
     private fun destroyCachePrinter(

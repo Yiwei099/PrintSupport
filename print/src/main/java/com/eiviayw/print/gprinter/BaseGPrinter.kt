@@ -9,6 +9,7 @@ import com.eiviayw.print.bean.param.GraphicParam
 import com.eiviayw.print.util.BitmapUtils
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
+import com.gprinter.command.LabelCommand
 import com.gprinter.io.PortManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -85,7 +86,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         cancelJob()
     }
 
-    //<editor-fold desc= "打印数据发送方式">
+    //<editor-fold desc= "Esc">
 
     /**
      * 图像形式打印
@@ -93,7 +94,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
      * @param clearCache 发送数据前时候先清除打印机缓冲区数据
      * @return 打印结果 true-打印成功；false-打印异常
      */
-    protected fun sendDataByGraphicParam(param: GraphicParam, clearCache: Boolean = true): Result {
+    protected fun sendEscDataByGraphicParam(param: GraphicParam, clearCache: Boolean = true): Result {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         try {
@@ -129,7 +130,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
                 }
             }
         } catch (e: Exception) {
-            recordLog("sendDataByGraphicParam trow Exception = ${e.message}")
+            recordLog("sendEscDataByGraphicParam trow Exception = ${e.message}")
             result.code = Result.FAILURE
             result.msg = e.message ?: ""
         }
@@ -145,13 +146,6 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         EscCommand().apply { drawImage(bitmap) }
 
     /**
-     * 发送指令
-     * @param command 指令集
-     */
-    protected fun sendData(command: Vector<Byte>) =
-        portManager?.writeDataImmediately(command) ?: false
-
-    /**
      * 初始化打印机机 / 清除打印缓冲区数据
      */
     protected fun initPrinter() {
@@ -159,6 +153,45 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             addInitializePrinter()
         }.command)
     }
-    //</editor-fold desc= "打印数据发送方式">
+
+    //</editor-fold desc= "Esc">
+
+    //<editor-fold desc="Tsc">
+    protected fun sendTscDataByGraphicParam(param: GraphicParam):Result{
+        val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
+        val result = Result()
+        val command = LabelCommand().apply {
+            addDirection(
+                LabelCommand.DIRECTION.BACKWARD,
+                LabelCommand.MIRROR.NORMAL
+            )
+            addDensity(LabelCommand.DENSITY.DNESITY2)
+            addCls()
+            drawXmlImage(
+                0,
+                4,
+                dataBitmap.width,
+                dataBitmap
+            )
+            addPrint(1, 1)
+        }.command
+        try {
+            sendData(command)
+        }catch (e:Exception){
+            recordLog("sendTscDataByGraphicParam trow Exception = ${e.message}")
+            result.code = Result.FAILURE
+            result.msg = e.message ?: ""
+        }
+
+        return result
+    }
+    //</editor-fold desc="Tsc">
+
+    /**
+     * 发送指令
+     * @param command 指令集
+     */
+    protected fun sendData(command: Vector<Byte>) =
+        portManager?.writeDataImmediately(command) ?: false
 
 }

@@ -10,7 +10,10 @@ import com.gprinter.io.PortManager
 import com.gprinter.utils.CallbackListener
 import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -21,13 +24,8 @@ import kotlinx.coroutines.*
  * @Date: 2023-12-08 22:41
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  * 佳博SDK-Net
- * 打印完需要断开链接，否则由于端口被占用的缘故，其他设备无法与此打印机建立通信
  */
-class EscNetPrinter(
-    private val mContext:Context,
-    private val ipAddress:String,
-    private val port:Int = 9100
-) : BaseGPrinter(tag = "EscNetPrinter") {
+abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
 
     private var failureTimes = 0
     private var printJob:Job? = null
@@ -44,7 +42,13 @@ class EscNetPrinter(
             val result = when(param){
                 is GraphicParam ->{
                     //图像模式
-                    sendDataByGraphicParam(param)
+                    if (commandType() == Command.ESC){
+                        sendEscDataByGraphicParam(param)
+                    }else if (commandType() == Command.TSC){
+                        sendTscDataByGraphicParam(param)
+                    }else{
+                        Result()
+                    }
                 }
 
                 is CommandParam ->{
@@ -97,10 +101,10 @@ class EscNetPrinter(
     }
 
     override fun createPrinterDevice(): PrinterDevices = PrinterDevices.Build()
-        .setContext(mContext)
+        .setContext(getContext())
         .setConnMethod(ConnMethod.WIFI)
-        .setIp(ipAddress)
-        .setPort(port)
+        .setIp(getIPAddress())
+        .setPort(getDevicePort())
         .setCommand(Command.ESC)
         .setCallbackListener(object : CallbackListener {
             override fun onConnecting() {
@@ -132,4 +136,9 @@ class EscNetPrinter(
             }
         })
         .build()
+
+    abstract fun getContext():Context
+    abstract fun getIPAddress():String
+    abstract fun commandType():Command
+    open fun getDevicePort() = 9100
 }
