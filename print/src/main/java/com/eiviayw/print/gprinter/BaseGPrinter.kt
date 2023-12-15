@@ -2,11 +2,11 @@ package com.eiviayw.print.gprinter
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.eiviayw.print.util.BitmapUtils
 import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.base.PrinterInterface
 import com.eiviayw.print.bean.Result
 import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.util.BitmapUtils
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
 import com.gprinter.io.PortManager
@@ -57,7 +57,8 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     }
 
     protected fun getPrinterPort() = portManager
-    protected fun getPrinterDevice() = devices
+    open fun getPrinterDevice() = devices
+
 
     override fun handlerTimerDo() {
         super.handlerTimerDo()

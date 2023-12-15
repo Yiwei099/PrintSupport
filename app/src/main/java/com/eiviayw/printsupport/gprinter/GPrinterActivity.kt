@@ -1,16 +1,25 @@
 package com.eiviayw.printsupport.gprinter
 
+import android.app.PendingIntent
+import android.content.Intent
+import android.hardware.usb.UsbConstants
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.print.bean.param.GraphicParam
-import com.eiviayw.print.eprinter.BaseEpsonPrinter
 import com.eiviayw.print.gprinter.BaseGPrinter
 import com.eiviayw.print.gprinter.EscNetPrinter
+import com.eiviayw.print.gprinter.EscUsbPrinter
 import com.eiviayw.printsupport.BuildConfig
 import com.eiviayw.printsupport.PrintDataProvide
 import com.eiviayw.printsupport.R
+import com.eiviayw.printsupport.UsbBroadcastReceiver
 import com.eiviayw.printsupport.databinding.ActivityGprinterBinding
 
 /**
@@ -29,6 +38,9 @@ class GPrinterActivity : AppCompatActivity() {
     private var printer: BaseGPrinter? = null
     private val viewBinding by lazy { ActivityGprinterBinding.inflate(layoutInflater) }
 
+    private var usbPathIndex = 1000
+    private val usbPathMap by lazy { mutableMapOf<Int,String>() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -36,28 +48,39 @@ class GPrinterActivity : AppCompatActivity() {
         initEven()
     }
 
-    private fun initData(){
-        if (BuildConfig.DEBUG){
-            viewBinding.etKey.setText("192.168.100.157")
+    private fun initData() {
+        if (BuildConfig.DEBUG) {
+            initIP(TEST_IP)
             viewBinding.etTimes.setText("1")
         }
+    }
+
+    private fun initIP(ip: String) {
+        viewBinding.etKey.setText(ip)
     }
 
     private fun initEven() {
         viewBinding.apply {
             rgInterface.setOnCheckedChangeListener { _, checkedId ->
                 interfaceType = if (checkedId == R.id.rbNet) {
+                    initIP(TEST_IP)
                     NET
                 } else {
+                    initIP("")
                     USB
                 }
             }
 
             btPrint.setOnClickListener {
-                if (TextUtils.isEmpty(getPrinterKey())) {
-                    return@setOnClickListener
+                if (rbNet.isChecked && !TextUtils.isEmpty(getPrinterKey())) {
+                    startPrintByNet()
                 }
-                startPrintByNet()
+
+                val usbCheckID = rgUsbDevice.checkedRadioButtonId
+                if (rbUsb.isChecked && usbCheckID != -1) {
+                    val usbKey = findViewById<RadioButton>(usbCheckID).text.toString()
+                    startPrintByUsb(usbKey)
+                }
             }
 
             btDestroy.setOnClickListener {
@@ -66,16 +89,60 @@ class GPrinterActivity : AppCompatActivity() {
                 printerTag = ""
                 showToast("旧的打印机已被销毁")
             }
+
+            btUsbDevice.setOnClickListener {
+                val deviceList = usbManager.deviceList
+                val iterator = deviceList.iterator()
+                viewBinding.rgUsbDevice.removeAllViews()
+                while (iterator.hasNext()) {
+                    val device = iterator.next().value
+                    val usbInterface = device.getInterface(0).interfaceClass
+                    if (usbInterface == UsbConstants.USB_CLASS_PRINTER) {
+                        if (usbManager.hasPermission(device)) {
+                            addUsbDevice(
+                                RadioButton(this@GPrinterActivity).apply {
+                                    text = StringBuilder().append(device.vendorId).append("-")
+                                        .append(device.productId).append("-")
+                                        .append(device.serialNumber)
+                                        .toString()
+                                }
+                            )
+                        } else {
+                            requestPermission(device)
+                        }
+                        showLog(device.toString())
+                    }
+                }
+            }
         }
+
+        usbBroadcastReceiver.setOnUsbReceiveListener(object :
+            UsbBroadcastReceiver.OnUsbReceiveListener {
+            override fun onUsbAttached(intent: Intent) {
+                handleUsbAttached(intent)
+            }
+
+            override fun onUsbDetached(intent: Intent) {
+                viewBinding.btUsbDevice.performClick()
+            }
+
+            override fun onUsbPermission(intent: Intent) {
+                handleUsbPermission(intent)
+            }
+        })
+    }
+
+    private fun addUsbDevice(view: RadioButton) {
+        viewBinding.rgUsbDevice.addView(view)
     }
 
     private fun getPrinterKey() = viewBinding.etKey.text.toString()
     private fun getPrintCopies() = viewBinding.etTimes.text.toString().toInt()
 
     private fun startPrintByNet() {
-        destroyCachePrinter()
+        destroyCachePrinter(newPrinter = EscNetPrinter(this, getPrinterKey()))
         val copies = getPrintCopies()
-        for (index in 0 until copies){
+        for (index in 0 until copies) {
             printer?.addMission(GraphicParam(bitmapData).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
@@ -84,31 +151,101 @@ class GPrinterActivity : AppCompatActivity() {
         }
     }
 
-    private fun destroyCachePrinter(createNew:Boolean = true) {
-        if (printerTag != getPrinterKey()) {
+    private fun startPrintByUsb(usbKey: String) {
+        val split = usbKey.split("-")
+        destroyCachePrinter(
+            newTag = usbKey,
+            newPrinter = EscUsbPrinter(this, split[0].toInt(), split[1].toInt())
+        )
+
+        val copies = getPrintCopies()
+        for (index in 0 until copies) {
+            printer?.addMission(GraphicParam(bitmapData).apply {
+                id = "${index.plus(1)}/$copies"
+                count = copies
+                this.index = index
+            })
+        }
+    }
+
+    private fun destroyCachePrinter(
+        createNew: Boolean = true,
+        newTag: String = getPrinterKey(),
+        newPrinter: BaseGPrinter
+    ) {
+        if (printerTag != newTag) {
             printer?.onDestroy()
             printer = null
             showToast("旧的打印机已被销毁")
-            if (createNew){
-                printer = EscNetPrinter(this, getPrinterKey())
+            if (createNew) {
+                printer = newPrinter
             }
         }
-        printerTag = getPrinterKey()
+        printerTag = newTag
     }
 
-    private fun showToast(msg:String){
-        Toast.makeText(this,msg, Toast.LENGTH_SHORT).show()
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        showLog(msg)
+    }
+
+    private fun showLog(msg: String) {
+        Log.d("GPrinterActivity", msg)
     }
 
     override fun onDestroy() {
         printer?.onDestroy()
         printer = null
         printerTag = ""
+        usbBroadcastReceiver.onDestroy()
         super.onDestroy()
     }
 
+    private val usbBroadcastReceiver by lazy { UsbBroadcastReceiver(this) }
+    private val usbManager by lazy { usbBroadcastReceiver.getUsbService() }
+
+    private fun handleUsbAttached(intent: Intent) {
+        getUsbDeviceFromBroadcast(intent)?.let {
+            val b = !usbManager.hasPermission(it)
+            if (b) {
+                requestPermission(it)
+            }
+            showToast("有USB设备接入")
+        }
+    }
+
+    private fun handleUsbPermission(intent: Intent) {
+        getUsbDeviceFromBroadcast(intent)?.let {
+            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                viewBinding.btUsbDevice.performClick()
+            } else {
+                showToast("USB设备访问被拒绝")
+            }
+        }
+    }
+
+    private fun requestPermission(device: UsbDevice) {
+        val mPermissionIntent =
+            PendingIntent.getBroadcast(
+                this,
+                REQUEST_CODE_USB_PERMISSION,
+                Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION),
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        usbManager.requestPermission(device, mPermissionIntent)
+    }
+
+    private fun getUsbDeviceFromBroadcast(intent: Intent): UsbDevice? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
+        } else {
+            intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+        }
+
     companion object {
+        private const val TEST_IP = "192.168.100.157"
         private const val NET = 0
         private const val USB = 1
+        private const val REQUEST_CODE_USB_PERMISSION = 100
     }
 }

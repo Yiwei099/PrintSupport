@@ -85,7 +85,7 @@
         android:layout_height="wrap_content"
         android:text="测试打印"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etKey" />
+        app:layout_constraintTop_toBottomOf="@id/llUsb" />
 
     <Button
         android:id="@+id/btDestroy"
@@ -95,4 +95,29 @@
         android:layout_marginStart="4dp"
         app:layout_constraintStart_toEndOf="@id/btPrint"
         app:layout_constraintTop_toTopOf="@id/btPrint"/>
+
+    <LinearLayout
+        android:id="@+id/llUsb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etKey"
+        android:paddingBottom="10dp">
+
+        <Button
+            android:id="@+id/btUsbDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="获取USB设备" />
+
+        <RadioGroup
+            android:id="@+id/rgUsbDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </LinearLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
