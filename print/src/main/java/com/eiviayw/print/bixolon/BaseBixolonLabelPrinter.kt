@@ -7,7 +7,15 @@ import android.os.Message
 import android.text.TextUtils
 import com.bixolon.labelprinter.BixolonLabelPrinter
 import com.eiviayw.print.base.BasePrinter
+import com.eiviayw.print.bean.Result
+import com.eiviayw.print.bean.param.CommandParam
+import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.util.BitmapUtils
 import com.eiviayw.print.util.BixolonDataAnalysisUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 指路：https://github.com/Yiwei099
@@ -21,10 +29,12 @@ import com.eiviayw.print.util.BixolonDataAnalysisUtils
 abstract class BaseBixolonLabelPrinter(
     private val mContext:Context
 ):BasePrinter() {
+    private var failureTimes = 0
+    private var job: Job? = null
+    private var printJob:Job? = null
 
-    private val printer by lazy { BixolonLabelPrinter(mContext, handler, Looper.getMainLooper()) }
-
-
+    //<editor-fold desc="打印机对象">
+    protected val printer by lazy { BixolonLabelPrinter(mContext, handler, Looper.getMainLooper()) }
 
     //接收打印机返回的消息
     protected val handler = Handler(Looper.getMainLooper()){msg ->
@@ -34,7 +44,7 @@ abstract class BaseBixolonLabelPrinter(
                     BixolonLabelPrinter.STATE_CONNECTED -> {
                         //已连接
                         recordLog("connect state true")
-//                        connectListener?.onConnectSuccess()
+                        onConnectSuccess()
                     }
                     BixolonLabelPrinter.STATE_CONNECTING -> {
                         //正在连接
@@ -43,7 +53,7 @@ abstract class BaseBixolonLabelPrinter(
                     BixolonLabelPrinter.STATE_NONE -> {
                         //连接状态未知
                        recordLog("connect state false")
-//                        connectListener?.onConnectFail()
+                        onConnectFailure()
                     }
                 }
             BixolonLabelPrinter.MESSAGE_READ -> dispatchMessage(msg)
@@ -88,6 +98,8 @@ abstract class BaseBixolonLabelPrinter(
         }
         true
     }
+
+    //</editor-fold desc="打印机对象">
 
     /**
      * 处理打印机返回的消息
@@ -163,4 +175,143 @@ abstract class BaseBixolonLabelPrinter(
             }
         }
     }
+
+    override fun handlerTimerDo() {
+        super.handlerTimerDo()
+        startJob()
+    }
+
+    //<editor-fold desc="连接相关">
+
+    private fun startJob() {
+        if (job == null) {
+            job = getMyScope().launch {
+                withContext(Dispatchers.IO) {
+                    if (!isConnected()){
+                        connect()
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 设备通信状态
+     */
+    private fun isConnected(): Boolean = printer.isConnected()
+
+    open fun connect(){
+
+    }
+
+    //</editor-fold desc="连接相关">
+
+    //<editor-fold desc="打印相关">
+    private suspend fun startPrint(){
+        getMissionQueue().peekFirst()?.let {param->
+            val result = when(param){
+                is GraphicParam ->{
+                    //图像模式
+                    sendDataByGraphicParam(param)
+                }
+
+                is CommandParam ->{
+                    //指令模式
+                    Result()
+                }
+                else ->{
+                    //未支持的模式
+                    Result()
+                }
+            }
+
+            getOnPrintListener()?.invoke(param,result)
+            recordLog("打印结果$result,$param")
+            if (result.isSuccess()){
+                missionSuccess()
+            }else{
+                missionFailure()
+            }
+        }
+    }
+
+    private fun sendDataByGraphicParam(param: GraphicParam):Result{
+        val result = Result()
+        BitmapUtils.getInstance().byteDataToBitmap(param.bitmapData)?.let {
+            try {
+                printer.beginTransactionPrint()
+                printer.drawBitmap(it, getAdjustXPosition(), 14, 320, 15, true)
+                printer.print(1, 1)
+                printer.endTransactionPrint()
+                printer.clearBuffer()
+            }catch (e:Exception){
+                recordLog("sendDataByGraphicParam trow Exception = ${e.message}")
+                result.code = Result.FAILURE
+                result.msg = e.message ?: ""
+            }
+        }
+        return result
+    }
+
+    private suspend fun missionSuccess() {
+        failureTimes = 0
+        if (isMissionEmpty()) {
+            printFinish()
+        } else {
+            removeHeaderMission()
+            if (!isMissionEmpty()) {
+                startPrint()
+            } else {
+                printFinish()
+            }
+        }
+    }
+
+    private suspend fun missionFailure(){
+        failureTimes += 1
+        if (isMaxRetry(failureTimes)){
+            missionSuccess()
+        }else{
+            startPrint()
+        }
+    }
+
+    private fun printFinish() {
+        failureTimes = 0
+        cancelJob()
+    }
+
+    private fun cancelJob(){
+        job?.cancel()
+        job = null
+        printJob?.cancel()
+        printJob = null
+    }
+    //</editor-fold desc="打印相关">
+
+    open fun onConnectSuccess(){
+        if (printJob == null){
+            printJob = getMyScope().launch {
+                withContext(Dispatchers.IO){
+                    startPrint()
+                }
+            }
+        }
+    }
+
+    open fun onConnectFailure(){
+        cancelJob()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancelJob()
+    }
+
+    open fun getAdjustXPosition():Int = 0
+
+    companion object{
+        const val TIMER_OUT = 5000
+    }
+
 }

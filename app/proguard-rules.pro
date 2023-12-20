@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-libraryjars libs/libcommon_V1.1.8.jar
+-libraryjars libs/BixolonLabelPrinterLibrary_V2.0.2.jar
+-keep class com.bixolon.labelprinter.** {*;}
+-keep class com.bixolon.commonlib.** {*;}
+-dontwarn com.bixolon.commonlib.**
+-dontwarn com.bixolon.labelprinter.**

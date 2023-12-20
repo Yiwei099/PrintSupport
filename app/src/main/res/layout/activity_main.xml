@@ -21,4 +21,9 @@
         android:layout_height="wrap_content"
         android:text="Epson SDK"/>
 
+    <Button
+        android:id="@+id/btBixolon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bixolon Label SDK"/>
 </LinearLayout>

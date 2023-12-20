@@ -1,9 +1,9 @@
 package com.eiviayw.printsupport
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import com.eiviayw.printsupport.bixolon.BixolonPrinterActivity
 import com.eiviayw.printsupport.databinding.ActivityMainBinding
 import com.eiviayw.printsupport.epson.EpsonPrinterActivity
 import com.eiviayw.printsupport.gprinter.GPrinterActivity
@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        initLibrary()
+
         setContentView(viewBinding.root)
 
         viewBinding.btGPrinter.setOnClickListener {
@@ -29,6 +32,20 @@ class MainActivity : AppCompatActivity() {
         }
        viewBinding.btEpson.setOnClickListener {
             startActivity(Intent(this, EpsonPrinterActivity::class.java))
+        }
+        viewBinding.btBixolon.setOnClickListener {
+            startActivity(Intent(this, BixolonPrinterActivity::class.java))
+        }
+    }
+
+    /**
+     * Application 初始化时调用
+     */
+    private fun initLibrary() {
+        try {
+            System.loadLibrary("bxl_common")
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

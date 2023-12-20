@@ -15,6 +15,12 @@ import kotlin.concurrent.fixedRateTimer
  * @Author: YYW
  * @Date: 2023-12-08 23:42
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
+ *
+ * 职责：
+ * a. 初始化逻辑线程
+ * b. 创建任务队列
+ * c. 定时轮询任务队列
+ * d. 打印日志
  */
 open class BasePrinter(
     private val openLog: Boolean = true,

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvInterfaceHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="通讯类型："
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/rgInterface"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/rgInterface" />
+
+    <RadioGroup
+        android:id="@+id/rgInterface"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@id/tvInterfaceHint"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/rbNet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Net   " />
+
+        <RadioButton
+            android:id="@+id/rbUsb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Usb   " />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/tvCopiesHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="打印份数："
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/etTimes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/etTimes" />
+
+    <EditText
+        android:id="@+id/etKey"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="192.168.100.12"
+        android:imeOptions="actionDone"
+        android:inputType="phone"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/etTimes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etTimes"
+        tools:text="192.168.100.12" />
+
+    <EditText
+        android:id="@+id/etTimes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="1"
+        android:imeOptions="actionDone"
+        android:inputType="number"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/rgInterface"
+        app:layout_constraintStart_toEndOf="@id/tvCopiesHint"
+        app:layout_constraintTop_toBottomOf="@id/rgInterface"
+        tools:text="2" />
+
+    <Button
+        android:id="@+id/btPrint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="测试打印"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llUsb" />
+
+    <Button
+        android:id="@+id/btDestroy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="销毁缓存打印机"
+        app:layout_constraintStart_toEndOf="@id/btPrint"
+        app:layout_constraintTop_toTopOf="@id/btPrint" />
+
+    <LinearLayout
+        android:id="@+id/llUsb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etKey">
+
+        <Button
+            android:id="@+id/btUsbDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="获取USB设备" />
+
+        <RadioGroup
+            android:id="@+id/rgUsbDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
