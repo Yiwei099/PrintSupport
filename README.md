@@ -1,7 +1,7 @@
 # PrintSupport
 
 ## 概述
-> 专注于 **收据** 与 **标签** 的打印工具
+> 专注于 **收据** 与 **标签** 的打印工具  
 > 集成多个品牌打印机的SDK：GPrinter(佳博)，Epson(爱普森)，Bixolon(必胜龙)，StarX(带接入)  
 > 已调试支持的打印机品牌：GPrinter(佳博)，Epson(爱普森)，Bixolon(必胜龙)，XPrinter(芯烨)，Element(元素)  
 > 支持局域网，USB，蓝牙通讯(具体情况取决于打印机以及使用的SDK策略)  
