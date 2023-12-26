@@ -12,7 +12,7 @@
 
 ## 详情
 ### 1. GPrinter SDK(佳博)
-> 指路佳博打印机官网：https://cn.gainscha.com/default.php  
+> 指路：[佳博打印机官网](https://cn.gainscha.com/default.php)  
 > 详细测试用例请看 **GPrinterActivity.kt**  
 > 调试状态：Esc✅，Tsc✅，局域网✅，USB✅，蓝牙✖️(手上一直没有可蓝牙通讯的打印机)  
 > 实测此SDK可通讯大多数品牌的打印机；如：GPrinter(佳博)，XPrinter(芯烨)，Epson(爱普森)，Bixolon(必胜龙)，Element(元素)  
@@ -46,7 +46,7 @@ printer.onDestroy()
 ```
 
 ### 2. Epson SDK(爱普森)
-> 指路 Epson 打印机官网：https://www.epson.com.cn/  
+> 指路：[Epson 打印机官网](https://www.epson.com.cn/)  
 > 详细测试用例请看 **EpsonPrinterActivity.kt**  
 > 调试状态：Esc✅，Tsc✖️，局域网✅，USB✅，蓝牙✖️  
 > 实测只能与自己品牌的打印机通讯  
@@ -79,7 +79,7 @@ printer.onDestroy()
 ```
 
 ### 3.Bixolon(必胜龙)
-> 指路 Bixolon 打印机官网：https://cn.bixolon.com/company.php  
+> 指路：[Bixolon 打印机官网](https://cn.bixolon.com/company.php)  
 > 详细测试用例请看 **BixolonPrinterActivity.kt**  
 > 调试状态：Tsc✅，Esc✖️，局域网✅，USB✖️，蓝牙✖️
 
