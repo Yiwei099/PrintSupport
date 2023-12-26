@@ -23,7 +23,7 @@ import kotlin.concurrent.fixedRateTimer
  * d. 打印日志
  */
 open class BasePrinter(
-    private val openLog: Boolean = true,
+    private var openLog: Boolean = true,
     private val tag: String = "",
     private val maxRetryTimes: Int = 5
 ) : PrinterInterface {
@@ -51,6 +51,10 @@ open class BasePrinter(
         if (openLog) {
             Log.d(tag, msg)
         }
+    }
+
+    fun setLogState(state:Boolean){
+        openLog = state
     }
 
     /**
@@ -102,19 +106,12 @@ open class BasePrinter(
     protected fun getOnConnectListener() = connectListener
     protected fun getOnPrintListener() = printListener
 
-    protected fun setOnConnectListener(l: (Result) -> Unit) {
+    fun setOnConnectListener(l: (Result) -> Unit) {
         connectListener = l
     }
 
-    protected fun setOnPrintListener(l: (BaseParam?, Result) -> Unit) {
+    fun setOnPrintListener(l: (BaseParam?, Result) -> Unit) {
         printListener = l
-    }
-
-    interface ConnectState {
-        companion object {
-            const val SUCCESS = 1
-            const val FAILURE = 0
-        }
     }
 
     //<editor-fold desc="任务队列操作API">

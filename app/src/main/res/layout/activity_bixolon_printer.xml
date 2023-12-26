@@ -41,6 +41,40 @@
     </RadioGroup>
 
     <TextView
+        android:id="@+id/tvLogStateHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="日志输出："
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/rgLog"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/rgLog" />
+
+    <RadioGroup
+        android:id="@+id/rgLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@id/tvLogStateHint"
+        app:layout_constraintTop_toBottomOf="@id/rgInterface">
+
+        <RadioButton
+            android:id="@+id/rbYesLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="输出   " />
+
+        <RadioButton
+            android:id="@+id/rbNoLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="不输出   " />
+
+    </RadioGroup>
+
+    <TextView
         android:id="@+id/tvCopiesHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,9 +108,9 @@
         android:inputType="number"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@id/rgInterface"
+        app:layout_constraintEnd_toEndOf="@id/rgLog"
         app:layout_constraintStart_toEndOf="@id/tvCopiesHint"
-        app:layout_constraintTop_toBottomOf="@id/rgInterface"
+        app:layout_constraintTop_toBottomOf="@id/rgLog"
         tools:text="2" />
 
     <Button

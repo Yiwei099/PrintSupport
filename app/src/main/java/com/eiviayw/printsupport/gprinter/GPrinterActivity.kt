@@ -204,7 +204,13 @@ class GPrinterActivity : AppCompatActivity() {
             printer = null
             showToast("旧的打印机已被销毁")
             if (createNew) {
-                printer = newPrinter
+                printer = newPrinter.apply {
+                    setOnPrintListener{baseParam, result ->
+                        baseParam?.let {
+                            showLog("${it.id} - ${result.isSuccess()}")
+                        }
+                    }
+                }
             }
         }
         printerTag = newTag

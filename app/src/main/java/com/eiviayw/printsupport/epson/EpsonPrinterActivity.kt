@@ -1,9 +1,10 @@
 package com.eiviayw.printsupport.epson
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.print.bean.param.GraphicParam
 import com.eiviayw.print.eprinter.BaseEpsonPrinter
 import com.eiviayw.print.eprinter.EpsonPrinter
@@ -68,12 +69,21 @@ class EpsonPrinterActivity : AppCompatActivity() {
     private fun getPrintCopies() = viewBinding.etTimes.text.toString().toInt()
 
     private fun destroyCachePrinter(createNew:Boolean = true) {
-        if (printerTag != (printer?.getPrinterTarget() ?: "")) {
+        if (printerTag != (printer?.getPrinterTarget() ?: (interfaceType + getPrinterKey()))) {
             printer?.onDestroy()
             printer = null
             showToast("旧的打印机已被销毁")
             if (createNew){
-                printer = EpsonPrinter(this, interfaceType, getPrinterKey())
+                printer = EpsonPrinter(this, interfaceType, getPrinterKey()).apply {
+                    setOnPrintListener { baseParam, result ->
+                        baseParam?.let {
+                            Log.d("EpsonPrinterActivity","${it.id} - ${result.isSuccess()}")
+                        }
+                    }
+                    setOnConnectListener {
+                        Log.d("EpsonPrinterActivity","连接 - ${it.isSuccess()}")
+                    }
+                }
             }
         }
         printerTag = interfaceType + getPrinterKey()

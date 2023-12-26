@@ -20,7 +20,7 @@ import com.eiviayw.library.provide.BaseProvide
  * 标签数据提供者
  */
 
-class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 300)) {
+class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 400)) {
     companion object {
         @Volatile
         private var instance: LabelProvide? = null

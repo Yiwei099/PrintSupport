@@ -27,73 +27,82 @@ import kotlinx.coroutines.withContext
  * 必胜龙标签打印机
  */
 abstract class BaseBixolonLabelPrinter(
-    private val mContext:Context
-):BasePrinter() {
+    private val mContext: Context
+) : BasePrinter() {
     private var failureTimes = 0
     private var job: Job? = null
-    private var printJob:Job? = null
+    private var printJob: Job? = null
 
     //<editor-fold desc="打印机对象">
     protected val printer by lazy { BixolonLabelPrinter(mContext, handler, Looper.getMainLooper()) }
 
     //接收打印机返回的消息
-    protected val handler = Handler(Looper.getMainLooper()){msg ->
+    protected val handler = Handler(Looper.getMainLooper()) { msg ->
         when (msg.what) {
             BixolonLabelPrinter.MESSAGE_STATE_CHANGE ->
                 when (msg.arg1) {
                     BixolonLabelPrinter.STATE_CONNECTED -> {
                         //已连接
                         recordLog("connect state true")
+                        getOnConnectListener()?.invoke(Result())
                         onConnectSuccess()
                     }
+
                     BixolonLabelPrinter.STATE_CONNECTING -> {
                         //正在连接
-                       recordLog("connect state...")
+                        recordLog("connect state...")
                     }
+
                     BixolonLabelPrinter.STATE_NONE -> {
                         //连接状态未知
-                       recordLog("connect state false")
+                        recordLog("connect state false")
+                        getOnConnectListener()?.invoke(Result(Result.FAILURE))
                         onConnectFailure()
                     }
                 }
+
             BixolonLabelPrinter.MESSAGE_READ -> dispatchMessage(msg)
             BixolonLabelPrinter.MESSAGE_DEVICE_NAME -> {
                 //设备名称
                 val connectedDeviceName = msg.data.getString(BixolonLabelPrinter.DEVICE_NAME)
-               recordLog("device name - $connectedDeviceName")
+                recordLog("device name - $connectedDeviceName")
             }
+
             BixolonLabelPrinter.MESSAGE_TOAST -> {
                 //消息
-               recordLog("message device toast")
+                recordLog("message device toast")
             }
 
             BixolonLabelPrinter.MESSAGE_LOG -> {
                 //Log
-               recordLog("device message log")
+                recordLog("device message log")
             }
+
             BixolonLabelPrinter.MESSAGE_BLUETOOTH_DEVICE_SET -> if (msg.obj == null) {
                 //No paired device
-               recordLog("no bluetooth device set")
+                recordLog("no bluetooth device set")
             } else {
                 // do something
-               recordLog("bluetooth device set")
+                recordLog("bluetooth device set")
             }
+
             BixolonLabelPrinter.MESSAGE_USB_DEVICE_SET -> if (msg.obj == null) {
                 //No connected device
-               recordLog("no usb device set")
+                recordLog("no usb device set")
             } else {
                 // do something
-               recordLog("usb device set")
+                recordLog("usb device set")
             }
+
             BixolonLabelPrinter.MESSAGE_NETWORK_DEVICE_SET -> {
                 val result = msg.obj as String
                 if (!TextUtils.isEmpty(result)) {
                     val netData = BixolonDataAnalysisUtils.handleFindNetData(result)
-                    if (netData != null){
+                    if (netData != null) {
 //                        findNetPrinterCallBack(netData)
                     }
                 }
-               recordLog("netWork device set：$result")
+                recordLog("netWork device set：$result")
             }
         }
         true
@@ -165,12 +174,14 @@ abstract class BaseBixolonLabelPrinter(
 
                 recordLog(buffer.toString())
             }
+
             BixolonLabelPrinter.PROCESS_GET_INFORMATION_MODEL_NAME, BixolonLabelPrinter.PROCESS_GET_INFORMATION_FIRMWARE_VERSION, BixolonLabelPrinter.PROCESS_EXECUTE_DIRECT_IO -> {
                 val data = String((msg.obj as ByteArray))
-                recordLog( data)
+                recordLog(data)
             }
+
             BixolonLabelPrinter.PROCESS_OUTPUT_COMPLETE -> {
-                recordLog( "Output Complete")
+                recordLog("Output Complete")
 //                printedListener?.onPrintedSuccess()
             }
         }
@@ -187,7 +198,7 @@ abstract class BaseBixolonLabelPrinter(
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    if (!isConnected()){
+                    if (!isConnected()) {
                         connect()
                     }
                 }
@@ -200,51 +211,52 @@ abstract class BaseBixolonLabelPrinter(
      */
     private fun isConnected(): Boolean = printer.isConnected()
 
-    open fun connect(){
+    open fun connect() {
 
     }
 
     //</editor-fold desc="连接相关">
 
     //<editor-fold desc="打印相关">
-    private suspend fun startPrint(){
-        getMissionQueue().peekFirst()?.let {param->
-            val result = when(param){
-                is GraphicParam ->{
+    private suspend fun startPrint() {
+        getMissionQueue().peekFirst()?.let { param ->
+            val result = when (param) {
+                is GraphicParam -> {
                     //图像模式
                     sendDataByGraphicParam(param)
                 }
 
-                is CommandParam ->{
+                is CommandParam -> {
                     //指令模式
                     Result()
                 }
-                else ->{
+
+                else -> {
                     //未支持的模式
                     Result()
                 }
             }
 
-            getOnPrintListener()?.invoke(param,result)
             recordLog("打印结果$result,$param")
-            if (result.isSuccess()){
+            if (result.isSuccess()) {
+                getOnPrintListener()?.invoke(param, result)
                 missionSuccess()
-            }else{
+            } else {
                 missionFailure()
             }
         }
     }
 
-    private fun sendDataByGraphicParam(param: GraphicParam):Result{
+    private fun sendDataByGraphicParam(param: GraphicParam): Result {
         val result = Result()
         BitmapUtils.getInstance().byteDataToBitmap(param.bitmapData)?.let {
             try {
                 printer.beginTransactionPrint()
-                printer.drawBitmap(it, getAdjustXPosition(), 14, 320, 15, true)
+                printer.drawBitmap(it, getAdjustXPosition(), getAdjustYPosition(), getWidth(), getLevel(), getDithering())
                 printer.print(1, 1)
                 printer.endTransactionPrint()
                 printer.clearBuffer()
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 recordLog("sendDataByGraphicParam trow Exception = ${e.message}")
                 result.code = Result.FAILURE
                 result.msg = e.message ?: ""
@@ -267,39 +279,42 @@ abstract class BaseBixolonLabelPrinter(
         }
     }
 
-    private suspend fun missionFailure(){
+    private suspend fun missionFailure() {
         failureTimes += 1
-        if (isMaxRetry(failureTimes)){
+        if (isMaxRetry(failureTimes)) {
+            getOnPrintListener()?.invoke(getHeaderMission(), Result(Result.FAILURE, "打印失败"))
             missionSuccess()
-        }else{
+        } else {
             startPrint()
         }
     }
 
     private fun printFinish() {
+        printer.disconnect()
         failureTimes = 0
         cancelJob()
     }
 
-    private fun cancelJob(){
+    private fun cancelJob() {
         job?.cancel()
         job = null
         printJob?.cancel()
         printJob = null
+        recordLog("on job cancel")
     }
     //</editor-fold desc="打印相关">
 
-    open fun onConnectSuccess(){
-        if (printJob == null){
+    open fun onConnectSuccess() {
+        if (printJob == null) {
             printJob = getMyScope().launch {
-                withContext(Dispatchers.IO){
+                withContext(Dispatchers.IO) {
                     startPrint()
                 }
             }
         }
     }
 
-    open fun onConnectFailure(){
+    open fun onConnectFailure() {
         cancelJob()
     }
 
@@ -308,9 +323,13 @@ abstract class BaseBixolonLabelPrinter(
         cancelJob()
     }
 
-    open fun getAdjustXPosition():Int = 0
+    open fun getAdjustXPosition(): Int = 0
+    open fun getAdjustYPosition(): Int = 0
+    open fun getLevel(): Int = 15
+    open fun getWidth(): Int = 320
+    open fun getDithering(): Boolean = true
 
-    companion object{
+    companion object {
         const val TIMER_OUT = 5000
     }
 

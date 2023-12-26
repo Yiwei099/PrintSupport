@@ -102,12 +102,11 @@ abstract class BaseEpsonPrinter(
             recordLog("链接异常 - ${e.errorStatus}")
             result.code = Result.FAILURE
             result.msg = "链接异常 - ${e.errorStatus}"
+            //连接失败必须取消并置空 Job。否则下次无法正常启动打印流程
+            cancelJob()
         } finally {
             getOnConnectListener()?.invoke(result)
-            if (!result.isSuccess()) {
-                //连接失败必须取消并置空 Job。否则下次无法正常启动打印流程
-                cancelJob()
-            }
+
         }
     }
 
@@ -232,6 +231,7 @@ abstract class BaseEpsonPrinter(
             result.msg = "断开连接异常：${e.message}"
         } finally {
             getOnConnectListener()?.invoke(result)
+            cancelJob()
         }
     }
 

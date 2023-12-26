@@ -1,6 +1,7 @@
 package com.eiviayw.printsupport.bixolon
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.drawingsupport.label.LabelProvide
@@ -27,6 +28,7 @@ class BixolonPrinterActivity : AppCompatActivity() {
 
     private fun initData() {
         initIP(TEST_IP)
+        viewBinding.etTimes.setText("1")
     }
 
     private fun initEven() {
@@ -36,8 +38,8 @@ class BixolonPrinterActivity : AppCompatActivity() {
                     getPrinterKey(),
                     newPrinter = if (rbNet.isChecked) BixolonNetLabelPrinter(
                         this@BixolonPrinterActivity,
-                        getPrinterKey()
-                    ) else BixolonUsbLabelPrinter(this@BixolonPrinterActivity)
+                        getPrinterKey(),adjustXPosition = 50
+                    ) else BixolonUsbLabelPrinter(this@BixolonPrinterActivity,50)
                 )
                 startPrintByNet()
 
@@ -51,6 +53,7 @@ class BixolonPrinterActivity : AppCompatActivity() {
 
     private fun startPrintByNet() {
         val copies = getPrintCopies()
+        printer?.setLogState(viewBinding.rbYesLog.isChecked)
         for (index in 0 until copies) {
             printer?.addMission(GraphicParam(tscBitmapData).apply {
                 id = "${index.plus(1)}/$copies"
@@ -70,7 +73,13 @@ class BixolonPrinterActivity : AppCompatActivity() {
             printer = null
             showToast("旧的打印机已被销毁")
             if (createNew) {
-                printer = newPrinter
+                printer = newPrinter.apply {
+                    setOnPrintListener { baseParam, result ->
+                        baseParam?.let {
+                            Log.d("BixolonPrinterActivity","${it.id} - ${result.isSuccess()}")
+                        }
+                    }
+                }
             }
         }
         printerTag = tag
