@@ -5,7 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.drawingsupport.label.LabelProvide
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bixolon.BaseBixolonLabelPrinter
 import com.eiviayw.print.bixolon.BixolonNetLabelPrinter
 import com.eiviayw.print.bixolon.BixolonUsbLabelPrinter
@@ -55,7 +55,7 @@ class BixolonPrinterActivity : AppCompatActivity() {
         val copies = getPrintCopies()
         printer?.setLogState(viewBinding.rbYesLog.isChecked)
         for (index in 0 until copies) {
-            printer?.addMission(GraphicParam(tscBitmapData).apply {
+            printer?.addMission(GraphicMission(tscBitmapData).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
                 this.index = index

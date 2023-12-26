@@ -5,7 +5,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.eprinter.BaseEpsonPrinter
 import com.eiviayw.print.eprinter.EpsonPrinter
 import com.eiviayw.printsupport.BuildConfig
@@ -93,7 +93,7 @@ class EpsonPrinterActivity : AppCompatActivity() {
         destroyCachePrinter()
         val copies = getPrintCopies()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicParam(bitmapData).apply {
+            printer?.addMission(GraphicMission(bitmapData).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
                 this.index = index

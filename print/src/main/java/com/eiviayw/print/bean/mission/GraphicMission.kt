@@ -1,4 +1,4 @@
-package com.eiviayw.print.bean.param
+package com.eiviayw.print.bean.mission
 
 import com.eiviayw.print.base.BaseParam
 
@@ -11,7 +11,7 @@ import com.eiviayw.print.base.BaseParam
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  *
  */
-class GraphicParam(
+class GraphicMission(
     val bitmapData: ByteArray,//图像数据
     private val bitmapHeight: Int = 0,
     val onceLength: Int = 500,

@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory
 import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.base.PrinterInterface
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.util.BitmapUtils
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
@@ -94,7 +94,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
      * @param clearCache 发送数据前时候先清除打印机缓冲区数据
      * @return 打印结果 true-打印成功；false-打印异常
      */
-    protected fun sendEscDataByGraphicParam(param: GraphicParam, clearCache: Boolean = true): Result {
+    protected fun sendEscDataByGraphicParam(param: GraphicMission, clearCache: Boolean = true): Result {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         try {
@@ -157,7 +157,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     //</editor-fold desc= "Esc">
 
     //<editor-fold desc="Tsc">
-    protected fun sendTscDataByGraphicParam(param: GraphicParam):Result{
+    protected fun sendTscDataByGraphicParam(param: GraphicMission):Result{
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         val command = LabelCommand().apply {

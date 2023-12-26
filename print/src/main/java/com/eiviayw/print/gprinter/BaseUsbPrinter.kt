@@ -5,8 +5,8 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.text.TextUtils
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.param.CommandParam
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.CommandMission
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.io.UsbPort
 import com.gprinter.utils.CallbackListener
@@ -39,7 +39,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
     private suspend fun startPrint() {
         getMissionQueue().peekFirst()?.let { param ->
             val result = when (param) {
-                is GraphicParam -> {
+                is GraphicMission -> {
                     //图像模式
                     if (commandType() == Command.ESC){
                         sendEscDataByGraphicParam(param)
@@ -50,7 +50,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
                     }
                 }
 
-                is CommandParam -> {
+                is CommandMission -> {
                     //指令模式
                     Result()
                 }

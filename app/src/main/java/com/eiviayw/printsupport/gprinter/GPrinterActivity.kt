@@ -13,7 +13,7 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.drawingsupport.label.LabelProvide
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.gprinter.BaseGPrinter
 import com.eiviayw.print.gprinter.EscNetGPrinter
 import com.eiviayw.print.gprinter.EscUsbGPrinter
@@ -159,7 +159,7 @@ class GPrinterActivity : AppCompatActivity() {
         )
         val copies = getPrintCopies()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicParam(getPrintData()).apply {
+            printer?.addMission(GraphicMission(getPrintData()).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
                 this.index = index
@@ -180,7 +180,7 @@ class GPrinterActivity : AppCompatActivity() {
 
         val copies = getPrintCopies()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicParam(getPrintData()).apply {
+            printer?.addMission(GraphicMission(getPrintData()).apply {
                 id = "${index.plus(1)}/$copies"
                 count = copies
                 this.index = index

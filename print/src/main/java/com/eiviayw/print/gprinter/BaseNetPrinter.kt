@@ -2,8 +2,8 @@ package com.eiviayw.print.gprinter
 
 import android.content.Context
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.param.CommandParam
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.CommandMission
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.io.EthernetPort
 import com.gprinter.io.PortManager
@@ -40,7 +40,7 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
     private suspend fun startPrint(){
         getMissionQueue().peekFirst()?.let {param->
             val result = when(param){
-                is GraphicParam ->{
+                is GraphicMission ->{
                     //图像模式
                     if (commandType() == Command.ESC){
                         sendEscDataByGraphicParam(param)
@@ -51,7 +51,7 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
                     }
                 }
 
-                is CommandParam ->{
+                is CommandMission ->{
                     //指令模式
                     Result()
                 }

@@ -5,8 +5,8 @@ import com.eiviayw.print.base.BaseParam
 import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.base.PrinterInterface
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.param.CommandParam
-import com.eiviayw.print.bean.param.GraphicParam
+import com.eiviayw.print.bean.mission.CommandMission
+import com.eiviayw.print.bean.mission.GraphicMission
 import com.epson.epos2.Epos2CallbackCode
 import com.epson.epos2.Epos2Exception
 import com.epson.epos2.printer.Printer
@@ -133,12 +133,12 @@ abstract class BaseEpsonPrinter(
      */
     open suspend fun handleMission(mission: BaseParam) {
         when (mission) {
-            is GraphicParam -> {
+            is GraphicMission -> {
                 //图像模式
                 sendDataByGraphicParam(mission)
             }
 
-            is CommandParam -> {
+            is CommandMission -> {
                 //指令模式
             }
 
@@ -152,7 +152,7 @@ abstract class BaseEpsonPrinter(
      * 打印图片
      * @param param 任务详情
      */
-    private fun sendDataByGraphicParam(param: GraphicParam) {
+    private fun sendDataByGraphicParam(param: GraphicMission) {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         try {
             mPrinter.beginTransaction()
