@@ -13,7 +13,7 @@ import com.eiviayw.print.base.BaseParam
  */
 class GraphicMission(
     val bitmapData: ByteArray,//图像数据
-    private val bitmapHeight: Int = 0,
+    var bitmapHeight: Int = 0,
     val onceLength: Int = 500,
     private val criticalHeight: Int = 1500,
     val graphicQuality: Int = 100,//图像质量：0～100

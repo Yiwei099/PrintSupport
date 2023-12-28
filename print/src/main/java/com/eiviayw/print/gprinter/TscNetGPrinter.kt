@@ -1,6 +1,7 @@
 package com.eiviayw.print.gprinter
 
 import android.content.Context
+import com.gprinter.command.LabelCommand
 import com.gprinter.utils.Command
 
 /**
@@ -15,7 +16,10 @@ import com.gprinter.utils.Command
 class TscNetGPrinter(
     private val mContext: Context,
     private val ipAddress: String,
-    private val port: Int = 9100
+    private val port: Int = 9100,
+    private val density: LabelCommand.DENSITY,
+    private val adjustX:Int = 0,
+    private val adjustY:Int = 0
 ) :BaseNetPrinter(){
     override fun getContext(): Context = mContext
 
@@ -24,5 +28,10 @@ class TscNetGPrinter(
     override fun commandType(): Command = Command.TSC
 
     override fun getDevicePort(): Int = port
+
+    override fun getLabelDensity(): LabelCommand.DENSITY = density
+
+    override fun getLabelAdjustXPosition(): Int = adjustX
+    override fun getLabelAdjustYPosition(): Int = adjustY
 
 }

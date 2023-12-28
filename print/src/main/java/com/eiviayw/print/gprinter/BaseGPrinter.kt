@@ -98,6 +98,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         try {
+            param.bitmapHeight = dataBitmap.height
             if (param.needSubsection()) {
                 val bitmaps = BitmapUtils.getInstance().cutBitmap(param.onceLength, dataBitmap)
                 bitmaps.forEachIndexed { index, bitmap ->
@@ -165,11 +166,11 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
                 LabelCommand.DIRECTION.BACKWARD,
                 LabelCommand.MIRROR.NORMAL
             )
-            addDensity(LabelCommand.DENSITY.DNESITY2)
+            addDensity(getLabelDensity())
             addCls()
-            drawXmlImage(
-                0,
-                4,
+            addBitmap(
+                getLabelAdjustXPosition(),
+                getLabelAdjustYPosition(),
                 dataBitmap.width,
                 dataBitmap
             )
@@ -191,7 +192,10 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
      * 发送指令
      * @param command 指令集
      */
-    protected fun sendData(command: Vector<Byte>) =
+    private fun sendData(command: Vector<Byte>) =
         portManager?.writeDataImmediately(command) ?: false
 
+    open fun getLabelDensity() = LabelCommand.DENSITY.DNESITY0
+    open fun getLabelAdjustXPosition() = 0
+    open fun getLabelAdjustYPosition() = 0
 }

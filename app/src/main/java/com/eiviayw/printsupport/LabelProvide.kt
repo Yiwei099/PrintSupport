@@ -1,4 +1,4 @@
-package com.eiviayw.drawingsupport.label
+package com.eiviayw.printsupport
 
 import android.graphics.Typeface
 import com.eiviayw.library.Constant
@@ -20,7 +20,7 @@ import com.eiviayw.library.provide.BaseProvide
  * 标签数据提供者
  */
 
-class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 400)) {
+class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 300)) {
     companion object {
         @Volatile
         private var instance: LabelProvide? = null

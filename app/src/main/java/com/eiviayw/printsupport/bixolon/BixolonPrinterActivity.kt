@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.eiviayw.drawingsupport.label.LabelProvide
+import com.eiviayw.printsupport.LabelProvide
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bixolon.BaseBixolonLabelPrinter
 import com.eiviayw.print.bixolon.BixolonNetLabelPrinter

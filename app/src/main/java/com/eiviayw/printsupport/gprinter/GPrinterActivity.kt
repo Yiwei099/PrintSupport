@@ -12,7 +12,7 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.eiviayw.drawingsupport.label.LabelProvide
+import com.eiviayw.printsupport.LabelProvide
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.gprinter.BaseGPrinter
 import com.eiviayw.print.gprinter.EscNetGPrinter
