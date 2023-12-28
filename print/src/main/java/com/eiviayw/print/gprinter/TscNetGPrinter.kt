@@ -17,7 +17,7 @@ class TscNetGPrinter(
     private val mContext: Context,
     private val ipAddress: String,
     private val port: Int = 9100,
-    private val density: LabelCommand.DENSITY,
+    private val density: LabelCommand.DENSITY = LabelCommand.DENSITY.DNESITY0,
     private val adjustX:Int = 0,
     private val adjustY:Int = 0
 ) :BaseNetPrinter(){
