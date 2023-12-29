@@ -9,7 +9,7 @@
 > ⑥ 只支持**Esc(收据)**，**Tsc(标签)** 两种指令；其他如针式，A4打印机不在对接范围内所以不考虑对接  
 > ⑦ 由于打印机有限，需要使用的同学可以直接拉取源码进行调试  
 > ⑧ SDK选择优先级建议：GPrinter > Epson > Bixolon > StarX  
-> ⑨ 使用**图像**打印时效果更佳：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
+> ⑨ 使用 **图像** 打印时效果更佳：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
 
 ## 详情
 ### 1. GPrinter SDK(佳博)
@@ -111,8 +111,9 @@ printer.onDestroy()
 
 ## 常见问题
 ### 1. 标签打印图片时宽不完整
-> 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围(如我所用于调试打印的标签 LabelProvide()，创建的图片宽度为 300 )  
-> 指路生成图片工具：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
+> ① 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围(如我所用于调试打印的标签 LabelProvide()，创建的图片宽度为 300 )  
+> ② 指路生成图片工具：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
+> ![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/printer_width.png)
 
 ### 2. 使用 Bixolon(必胜龙)标签打印机SDK 时崩溃
 > 检查是否已经初始化该 SDK 的 JNI
