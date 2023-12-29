@@ -1,4 +1,4 @@
-package com.eiviayw.drawingsupport.bean
+package com.eiviayw.printsupport.bean
 
 /**
  * Created with Android Studio.

@@ -9,6 +9,7 @@
 > ⑥ 只支持**Esc(收据)**，**Tsc(标签)** 两种指令；其他如针式，A4打印机不在对接范围内所以不考虑对接  
 > ⑦ 由于打印机有限，需要使用的同学可以直接拉取源码进行调试  
 > ⑧ SDK选择优先级建议：GPrinter > Epson > Bixolon > StarX  
+> ⑨ 使用**图像**打印时效果更佳：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
 
 ## 详情
 ### 1. GPrinter SDK(佳博)
@@ -83,24 +84,41 @@ printer.onDestroy()
 > 详细测试用例请看 **BixolonPrinterActivity.kt**  
 > 调试状态：Tsc✅，Esc✖️，局域网✅，USB✖️，蓝牙✖️
 
-#### a. 创建
+#### a. 初始化JNI
+```
+//建议在 Application 初始化时调用
+BixolonUtils.getInstance().initLibrary()
+```
+#### b. 创建
 ```
 //局域网通讯
 val key = "192.168.100.155"
 val printer = BixolonNetLabelPrinter(mContext)
 
 ```
-#### b. 打印
+#### c. 打印
 ```
 //以图片的形式打印
 val mission = GraphicMission(bitmapArray)
 printer.addMission(mission)
 ```
-#### c. 销毁(必要时)
+#### d. 销毁(必要时)
 ```
 printer.onDestroy()
 ```
 
 不定期更新
 
-#### Print support by android  
+## 常见问题
+### 1. 标签打印图片时宽不完整
+> 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围(如我所用于调试打印的标签 LabelProvide()，创建的图片宽度为 300 )  
+> 指路生成图片工具：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
+
+### 2. 使用 Bixolon(必胜龙)标签打印机SDK 时崩溃
+> 检查是否已经初始化该 SDK 的 JNI
+```
+//建议在 Application 初始化时调用
+BixolonUtils.getInstance().initLibrary()
+```
+
+## Print support by android  

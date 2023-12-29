@@ -3,6 +3,7 @@ package com.eiviayw.printsupport
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.eiviayw.print.util.BixolonUtils
 import com.eiviayw.printsupport.bixolon.BixolonPrinterActivity
 import com.eiviayw.printsupport.databinding.ActivityMainBinding
 import com.eiviayw.printsupport.epson.EpsonPrinterActivity
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        initLibrary()
+        BixolonUtils.getInstance().initLibrary()
 
         setContentView(viewBinding.root)
 
@@ -38,14 +39,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Application 初始化时调用
-     */
-    private fun initLibrary() {
-        try {
-            System.loadLibrary("bxl_common")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 }

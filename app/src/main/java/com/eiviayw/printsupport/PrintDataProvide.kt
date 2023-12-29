@@ -1,8 +1,8 @@
 package com.eiviayw.printsupport
 
 import android.graphics.Typeface
-import com.eiviayw.drawingsupport.bean.Goods
-import com.eiviayw.drawingsupport.bean.Order
+import com.eiviayw.printsupport.bean.Goods
+import com.eiviayw.printsupport.bean.Order
 import com.eiviayw.library.Constant
 import com.eiviayw.library.bean.param.BaseParam
 import com.eiviayw.library.bean.param.LineDashedParam
@@ -11,6 +11,15 @@ import com.eiviayw.library.bean.param.TextParam
 import com.eiviayw.library.draw.BitmapOption
 import com.eiviayw.library.provide.BaseProvide
 
+/**
+ * 指路：https://github.com/Yiwei099
+ *
+ * Created with Android Studio.
+ * @Author: YYW
+ * @Date: 2023-12-08 22:41
+ * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
+ * 打印数据提供者
+ */
 class PrintDataProvide private constructor():BaseProvide(BitmapOption()) {
     companion object {
         @Volatile
@@ -45,7 +54,7 @@ class PrintDataProvide private constructor():BaseProvide(BitmapOption()) {
         addAll(convertOrderFooter(order))
     }
 
-    private fun convertOrderHeader(order: Order,isMulti: Boolean = false) = mutableListOf<BaseParam>().apply {
+    private fun convertOrderHeader(order: Order, isMulti: Boolean = false) = mutableListOf<BaseParam>().apply {
         add(
             TextParam(
                 text = "Tax Invoice",

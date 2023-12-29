@@ -155,6 +155,7 @@ abstract class BaseEpsonPrinter(
     private fun sendDataByGraphicParam(param: GraphicMission) {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         try {
+            //开启一个打印事务(一张图片一个事务)
             mPrinter.beginTransaction()
             mPrinter.addImage(
                 dataBitmap,
@@ -171,6 +172,7 @@ abstract class BaseEpsonPrinter(
             mPrinter.addCut(Printer.PARAM_DEFAULT)
             mPrinter.sendData(Printer.PARAM_DEFAULT)
             mPrinter.endTransaction()
+            //事务结束后清空缓存数据
             mPrinter.clearCommandBuffer()
         } catch (e: Exception) {
             val msg = e.message

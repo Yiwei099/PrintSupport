@@ -4,13 +4,23 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.eiviayw.printsupport.LabelProvide
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bixolon.BaseBixolonLabelPrinter
 import com.eiviayw.print.bixolon.BixolonNetLabelPrinter
 import com.eiviayw.print.bixolon.BixolonUsbLabelPrinter
+import com.eiviayw.printsupport.LabelProvide
 import com.eiviayw.printsupport.databinding.ActivityBixolonPrinterBinding
 
+
+/**
+ * 指路：https://github.com/Yiwei099
+ *
+ * Created with Android Studio.
+ * @Author: YYW
+ * @Date: 2023-12-08 22:41
+ * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
+ * 必胜龙标签 打印机 SDK 测试用例
+ */
 class BixolonPrinterActivity : AppCompatActivity() {
 
     private val viewBinding by lazy { ActivityBixolonPrinterBinding.inflate(layoutInflater) }

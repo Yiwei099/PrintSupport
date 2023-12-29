@@ -13,6 +13,15 @@ import com.eiviayw.printsupport.PrintDataProvide
 import com.eiviayw.printsupport.R
 import com.eiviayw.printsupport.databinding.ActivityEpsonPrinterBinding
 
+/**
+ * 指路：https://github.com/Yiwei099
+ *
+ * Created with Android Studio.
+ * @Author: YYW
+ * @Date: 2023-12-08 22:41
+ * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
+ * Epson 打印机 SDK 测试用例
+ */
 class EpsonPrinterActivity : AppCompatActivity() {
     private val bitmapData by lazy { PrintDataProvide.getInstance().getBitmapArray() }
     private var interfaceType: String = BaseEpsonPrinter.NET

@@ -11,7 +11,7 @@ import com.eiviayw.print.bean.Result
 import com.eiviayw.print.bean.mission.CommandMission
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.util.BitmapUtils
-import com.eiviayw.print.util.BixolonDataAnalysisUtils
+import com.eiviayw.print.util.BixolonUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -97,7 +97,7 @@ abstract class BaseBixolonLabelPrinter(
             BixolonLabelPrinter.MESSAGE_NETWORK_DEVICE_SET -> {
                 val result = msg.obj as String
                 if (!TextUtils.isEmpty(result)) {
-                    val netData = BixolonDataAnalysisUtils.handleFindNetData(result)
+                    val netData = BixolonUtils.getInstance().handleFindNetData(result)
                     if (netData != null) {
 //                        findNetPrinterCallBack(netData)
                     }
@@ -251,10 +251,12 @@ abstract class BaseBixolonLabelPrinter(
         val result = Result()
         BitmapUtils.getInstance().byteDataToBitmap(param.bitmapData)?.let {
             try {
+                //开启一个打印事务(一张图片一个事务)
                 printer.beginTransactionPrint()
                 printer.drawBitmap(it, getAdjustXPosition(), getAdjustYPosition(), getWidth(), getLevel(), getDithering())
                 printer.print(1, 1)
                 printer.endTransactionPrint()
+                //事务结束后清空缓存数据
                 printer.clearBuffer()
             } catch (e: Exception) {
                 recordLog("sendDataByGraphicParam trow Exception = ${e.message}")
