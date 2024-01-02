@@ -11,6 +11,23 @@
 > ⑧ SDK选择优先级建议：GPrinter > Epson > Bixolon > StarX  
 > ⑨ 使用 **图像** 打印时效果更佳：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
 
+## 获取使用
+### 1. Add it in your root build.gradle at the end of repositories:
+```
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+  }
+}
+```
+
+### 2. Add the dependency:
+```
+implementation 'com.github.Yiwei099:PrintSupport:$releaseVersion'
+```
+
 ## 详情
 ### 1. GPrinter SDK(佳博)
 > 指路：[佳博打印机官网](https://cn.gainscha.com/default.php)  
@@ -107,13 +124,11 @@ printer.addMission(mission)
 printer.onDestroy()
 ```
 
-不定期更新
-
 ## 常见问题
 ### 1. 标签打印图片时宽不完整
 > ① 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围(如我所用于调试打印的标签 LabelProvide()，创建的图片宽度为 300 )  
 > ② 指路生成图片工具：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
-> ![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/printer_width.png)
+![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/printer_width.png)
 
 ### 2. 使用 Bixolon(必胜龙)标签打印机SDK 时崩溃
 > 检查是否已经初始化该 SDK 的 JNI
@@ -122,4 +137,4 @@ printer.onDestroy()
 BixolonUtils.getInstance().initLibrary()
 ```
 
-## Print support by android  
+## Print support by android(不定期更新)  
