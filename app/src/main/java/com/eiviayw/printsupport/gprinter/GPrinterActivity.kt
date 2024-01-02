@@ -12,7 +12,6 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.eiviayw.printsupport.LabelProvide
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.gprinter.BaseGPrinter
 import com.eiviayw.print.gprinter.EscNetGPrinter
@@ -20,6 +19,7 @@ import com.eiviayw.print.gprinter.EscUsbGPrinter
 import com.eiviayw.print.gprinter.TscNetGPrinter
 import com.eiviayw.print.gprinter.TscUsbGPrinter
 import com.eiviayw.printsupport.BuildConfig
+import com.eiviayw.printsupport.LabelProvide
 import com.eiviayw.printsupport.PrintDataProvide
 import com.eiviayw.printsupport.R
 import com.eiviayw.printsupport.UsbBroadcastReceiver
@@ -134,7 +134,7 @@ class GPrinterActivity : AppCompatActivity() {
             }
 
             override fun onUsbDetached(intent: Intent) {
-                viewBinding.btUsbDevice.performClick()
+//                viewBinding.btUsbDevice.performClick()
             }
 
             override fun onUsbPermission(intent: Intent) {

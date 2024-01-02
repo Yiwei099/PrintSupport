@@ -14,6 +14,7 @@ import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -32,6 +33,10 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
 
     override fun cancelJob() {
         super.cancelJob()
+        cancelPrintJob()
+    }
+
+    private fun cancelPrintJob(){
         printJob?.cancel()
         printJob = null
     }
@@ -95,7 +100,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
 
     private fun printFinish() {
         failureTimes = 0
-        getPrinterPort()?.closePort()
+//        getPrinterPort()?.closePort()
         cancelJob()
     }
 
@@ -123,13 +128,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
             }
 
             override fun onSuccess(printerDevices: PrinterDevices?) {
-                if (printJob == null) {
-                    printJob = getMyScope().launch {
-                        withContext(Dispatchers.IO) {
-                            startPrint()
-                        }
-                    }
-                }
+                startPrintJob(true)
             }
 
             override fun onReceive(data: ByteArray?) {
@@ -140,6 +139,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
             }
 
             override fun onDisconnect() {
+                getPrinterPort()?.closePort()
                 cancelJob()
             }
 
@@ -161,6 +161,22 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         }
         recordLog("没找到${toString()}打印机")
         return null
+    }
+
+    override fun noLinkRequired(status: Boolean) {
+        super.noLinkRequired(status)
+        startPrintJob(false)
+    }
+
+    private fun startPrintJob(needDelay:Boolean){
+        if (printJob == null) {
+            printJob = getMyScope().launch {
+                withContext(Dispatchers.IO) {
+                    if (needDelay) delay(5000)
+                    startPrint()
+                }
+            }
+        }
     }
 
     private fun mateSerialNumber(s: String?): Boolean {

@@ -67,6 +67,11 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     }
 
     private fun startJob() {
+        if (portManager?.connectStatus == true){
+            noLinkRequired(true)
+            return
+        }
+
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
@@ -195,6 +200,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     private fun sendData(command: Vector<Byte>) =
         portManager?.writeDataImmediately(command) ?: false
 
+    open fun noLinkRequired(status:Boolean){ }
     open fun getLabelDensity() = LabelCommand.DENSITY.DNESITY0
     open fun getLabelAdjustXPosition() = 0
     open fun getLabelAdjustYPosition() = 0
