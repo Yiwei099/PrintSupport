@@ -169,6 +169,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
 
     override fun noLinkRequired(status: Boolean) {
         super.noLinkRequired(status)
+        recordLog("noLinkRequired")
         startPrintJob(false)
     }
 
@@ -176,6 +177,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         if (printJob == null) {
             printJob = getMyScope().launch {
                 withContext(Dispatchers.IO) {
+                    recordLog("startPrintJob")
                     if (needDelay) delay(5000)
                     startPrint()
                 }

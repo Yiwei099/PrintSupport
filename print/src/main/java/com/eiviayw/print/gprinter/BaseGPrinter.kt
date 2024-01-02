@@ -8,6 +8,7 @@ import com.eiviayw.print.bean.Result
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.eiviayw.print.util.BitmapUtils
+import com.eiviayw.print.util.SerializationUtils
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
 import com.gprinter.command.LabelCommand
@@ -201,9 +202,11 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         val result = Result()
         if (clearCache) initPrinter()
         try {
-            val sendResult = sendData(param.command)
-            if (!sendResult) {
-                throw Exception("Port Exception")
+            SerializationUtils.getInstance().cloneObject(param.command)?.let {
+                val sendResult = sendData(it)
+                if (!sendResult) {
+                    throw Exception("Port Exception")
+                }
             }
         }catch (e:Exception){
             recordLog("sendEscDataByCommandParam trow Exception = ${e.message}")
