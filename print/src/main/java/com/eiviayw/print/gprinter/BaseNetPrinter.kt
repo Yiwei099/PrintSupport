@@ -2,8 +2,8 @@ package com.eiviayw.print.gprinter
 
 import android.content.Context
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.mission.CommandMission
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.io.EthernetPort
 import com.gprinter.io.PortManager
@@ -51,10 +51,15 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
                     }
                 }
 
-                is CommandMission ->{
+                is GPrinterMission -> {
                     //指令模式
-                    Result()
+                    if (commandType() == Command.ESC){
+                        sendEscDataByCommandParam(param)
+                    }else{
+                        Result()
+                    }
                 }
+
                 else ->{
                     //未支持的模式
                     Result()

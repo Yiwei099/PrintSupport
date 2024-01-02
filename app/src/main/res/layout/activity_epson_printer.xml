@@ -94,11 +94,20 @@
         app:layout_constraintTop_toBottomOf="@id/etKey" />
 
     <Button
+        android:id="@+id/btOpenBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开钱箱"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/btPrint"
+        app:layout_constraintTop_toBottomOf="@id/etKey" />
+
+    <Button
         android:id="@+id/btDestroy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="销毁缓存打印机"
         android:layout_marginStart="4dp"
-        app:layout_constraintStart_toEndOf="@id/btPrint"
+        app:layout_constraintStart_toEndOf="@id/btOpenBox"
         app:layout_constraintTop_toTopOf="@id/btPrint"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

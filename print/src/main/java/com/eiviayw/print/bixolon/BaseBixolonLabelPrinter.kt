@@ -8,8 +8,8 @@ import android.text.TextUtils
 import com.bixolon.labelprinter.BixolonLabelPrinter
 import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.mission.CommandMission
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.eiviayw.print.util.BitmapUtils
 import com.eiviayw.print.util.BixolonUtils
 import kotlinx.coroutines.Dispatchers
@@ -226,7 +226,7 @@ abstract class BaseBixolonLabelPrinter(
                     sendDataByGraphicParam(param)
                 }
 
-                is CommandMission -> {
+                is GPrinterMission -> {
                     //指令模式
                     Result()
                 }

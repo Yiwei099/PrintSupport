@@ -6,6 +6,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.epson.BaseEpsonMissionParam
+import com.eiviayw.print.bean.mission.command.epson.DrawerMissionParam
+import com.eiviayw.print.bean.mission.command.epson.EpsonMission
 import com.eiviayw.print.eprinter.BaseEpsonPrinter
 import com.eiviayw.print.eprinter.EpsonPrinter
 import com.eiviayw.printsupport.BuildConfig
@@ -64,6 +67,13 @@ class EpsonPrinterActivity : AppCompatActivity() {
                 startPrintByNet()
             }
 
+            btOpenBox.setOnClickListener {
+                if (TextUtils.isEmpty(getPrinterKey())) {
+                    return@setOnClickListener
+                }
+                startOpenBoxByNet()
+            }
+
             btDestroy.setOnClickListener {
                 printer?.onDestroy()
                 printer = null
@@ -77,20 +87,20 @@ class EpsonPrinterActivity : AppCompatActivity() {
     private fun getPrinterKey() = viewBinding.etKey.text.toString()
     private fun getPrintCopies() = viewBinding.etTimes.text.toString().toInt()
 
-    private fun destroyCachePrinter(createNew:Boolean = true) {
+    private fun destroyCachePrinter(createNew: Boolean = true) {
         if (printerTag != (printer?.getPrinterTarget() ?: (interfaceType + getPrinterKey()))) {
             printer?.onDestroy()
             printer = null
             showToast("旧的打印机已被销毁")
-            if (createNew){
+            if (createNew) {
                 printer = EpsonPrinter(this, interfaceType, getPrinterKey()).apply {
                     setOnPrintListener { baseParam, result ->
                         baseParam?.let {
-                            Log.d("EpsonPrinterActivity","${it.id} - ${result.isSuccess()}")
+                            Log.d("EpsonPrinterActivity", "${it.id} - ${result.isSuccess()}")
                         }
                     }
                     setOnConnectListener {
-                        Log.d("EpsonPrinterActivity","连接 - ${it.isSuccess()}")
+                        Log.d("EpsonPrinterActivity", "连接 - ${it.isSuccess()}")
                     }
                 }
             }
@@ -110,8 +120,16 @@ class EpsonPrinterActivity : AppCompatActivity() {
         }
     }
 
-    private fun showToast(msg:String){
-        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
+    private fun startOpenBoxByNet() {
+        destroyCachePrinter()
+        printer?.addMission(EpsonMission(mutableListOf<BaseEpsonMissionParam>().apply {
+            add(DrawerMissionParam())
+        }))
+    }
+
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {

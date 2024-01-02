@@ -1,12 +1,15 @@
 package com.eiviayw.print.eprinter
 
 import android.graphics.BitmapFactory
-import com.eiviayw.print.base.BaseParam
+import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.base.PrinterInterface
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.mission.CommandMission
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.epson.CommandMissionParam
+import com.eiviayw.print.bean.mission.command.epson.DrawerMissionParam
+import com.eiviayw.print.bean.mission.command.epson.EpsonMission
+import com.eiviayw.print.bean.mission.command.epson.TextMissionParam
 import com.epson.epos2.Epos2CallbackCode
 import com.epson.epos2.Epos2Exception
 import com.epson.epos2.printer.Printer
@@ -131,15 +134,16 @@ abstract class BaseEpsonPrinter(
      * 处理任务
      * @param mission 打印任务
      */
-    open suspend fun handleMission(mission: BaseParam) {
+    open suspend fun handleMission(mission: BaseMission) {
         when (mission) {
             is GraphicMission -> {
                 //图像模式
-                sendDataByGraphicParam(mission)
+                sendDataByGraphic(mission)
             }
 
-            is CommandMission -> {
+            is EpsonMission -> {
                 //指令模式
+                sendDataByCommand(mission)
             }
 
             else -> {
@@ -152,7 +156,7 @@ abstract class BaseEpsonPrinter(
      * 打印图片
      * @param param 任务详情
      */
-    private fun sendDataByGraphicParam(param: GraphicMission) {
+    private fun sendDataByGraphic(param: GraphicMission) {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         try {
             //开启一个打印事务(一张图片一个事务)
@@ -180,6 +184,28 @@ abstract class BaseEpsonPrinter(
             getOnPrintListener()?.invoke(param, Result(Result.FAILURE, msg))
         } finally {
             dataBitmap.recycle()
+        }
+    }
+
+    private fun sendDataByCommand(param: EpsonMission){
+        try{
+            mPrinter.beginTransaction()
+            param.params.forEach {
+                when(it){
+                    is DrawerMissionParam -> mPrinter.addPulse(Printer.PARAM_DEFAULT,Printer.PARAM_DEFAULT)
+                    is TextMissionParam -> mPrinter.addText(it.data)
+                    is CommandMissionParam -> mPrinter.addCommand(it.data)
+                    else ->{/* 暂未支持的类型 */}
+                }
+            }
+            mPrinter.sendData(Printer.PARAM_DEFAULT)
+            mPrinter.endTransaction()
+            //事务结束后清空缓存数据
+            mPrinter.clearCommandBuffer()
+        }catch (e:Exception){
+            val msg = e.message
+            recordLog("sendDataByCommand trow Exception = $msg")
+            getOnPrintListener()?.invoke(param, Result(Result.FAILURE, msg))
         }
     }
 

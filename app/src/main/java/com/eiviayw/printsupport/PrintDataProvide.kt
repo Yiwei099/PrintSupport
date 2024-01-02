@@ -1,8 +1,6 @@
 package com.eiviayw.printsupport
 
 import android.graphics.Typeface
-import com.eiviayw.printsupport.bean.Goods
-import com.eiviayw.printsupport.bean.Order
 import com.eiviayw.library.Constant
 import com.eiviayw.library.bean.param.BaseParam
 import com.eiviayw.library.bean.param.LineDashedParam
@@ -10,6 +8,10 @@ import com.eiviayw.library.bean.param.MultiElementParam
 import com.eiviayw.library.bean.param.TextParam
 import com.eiviayw.library.draw.BitmapOption
 import com.eiviayw.library.provide.BaseProvide
+import com.eiviayw.printsupport.bean.Goods
+import com.eiviayw.printsupport.bean.Order
+import com.gprinter.command.EscCommand
+import java.util.Vector
 
 /**
  * 指路：https://github.com/Yiwei099
@@ -34,6 +36,7 @@ class PrintDataProvide private constructor():BaseProvide(BitmapOption()) {
     private val order by lazy { generateOrder() }
     private val goodsData by lazy { generateGoodsData() }
     private var bitmapArray:ByteArray? = null
+    private var command:Vector<Byte> = Vector()
 
     fun getBitmapArray():ByteArray{
         if (bitmapArray == null){
@@ -41,6 +44,23 @@ class PrintDataProvide private constructor():BaseProvide(BitmapOption()) {
         }
         return bitmapArray!!
     }
+
+    fun getCommand():Vector<Byte>{
+        if (command.isNotEmpty()){
+            return command
+        }
+        command = generateCommand()
+        return command
+    }
+
+    private fun generateCommand()= EscCommand().apply {
+        addSelectInternationalCharacterSet(EscCommand.CHARACTER_SET.UK)
+        addText("Tax Invoice\n\n")
+        addText("-----------------------------------\n\n")
+        addText("Items\n\n")
+        addText("-----------------------------------\n\n")
+        addText("\n\n")
+    }.command
 
     private fun start():ByteArray{
         val params = generateDrawParam(order, goodsData, false)

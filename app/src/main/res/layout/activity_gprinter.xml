@@ -75,6 +75,40 @@
     </RadioGroup>
 
     <TextView
+        android:id="@+id/tvModel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="打印策略："
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/rgMissionModel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/rgMissionModel" />
+
+    <RadioGroup
+        android:id="@+id/rgMissionModel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@id/tvModel"
+        app:layout_constraintTop_toBottomOf="@id/rgPrinterType">
+
+        <RadioButton
+            android:id="@+id/rbPicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="图片   " />
+
+        <RadioButton
+            android:id="@+id/rbText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="文本   " />
+
+    </RadioGroup>
+
+    <TextView
         android:id="@+id/tvCopiesHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -108,9 +142,9 @@
         android:inputType="number"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@id/rgInterface"
+        app:layout_constraintEnd_toEndOf="@id/rgMissionModel"
         app:layout_constraintStart_toEndOf="@id/tvCopiesHint"
-        app:layout_constraintTop_toBottomOf="@id/rgPrinterType"
+        app:layout_constraintTop_toBottomOf="@id/rgMissionModel"
         tools:text="2" />
 
     <Button
@@ -122,12 +156,21 @@
         app:layout_constraintTop_toBottomOf="@id/llUsb" />
 
     <Button
+        android:id="@+id/btOpenBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开钱箱"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@id/btPrint"
+        app:layout_constraintTop_toBottomOf="@id/llUsb" />
+
+    <Button
         android:id="@+id/btDestroy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:text="销毁缓存打印机"
-        app:layout_constraintStart_toEndOf="@id/btPrint"
+        app:layout_constraintStart_toEndOf="@id/btOpenBox"
         app:layout_constraintTop_toTopOf="@id/btPrint" />
 
     <LinearLayout

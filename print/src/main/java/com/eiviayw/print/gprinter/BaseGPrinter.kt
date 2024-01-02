@@ -6,6 +6,7 @@ import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.base.PrinterInterface
 import com.eiviayw.print.bean.Result
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.eiviayw.print.util.BitmapUtils
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
@@ -32,7 +33,7 @@ import java.util.Vector
  */
 abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterface {
     private var portManager: PortManager? = null
-    private val devices by lazy { createPrinterDevice() }
+//    private val devices by lazy { createPrinterDevice() }
 
     private var job: Job? = null
 
@@ -58,7 +59,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     }
 
     protected fun getPrinterPort() = portManager
-    open fun getPrinterDevice() = devices
+    open fun getPrinterDevice() = createPrinterDevice()
 
 
     override fun handlerTimerDo() {
@@ -154,7 +155,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     /**
      * 初始化打印机机 / 清除打印缓冲区数据
      */
-    protected fun initPrinter() {
+    private fun initPrinter() {
         sendData(EscCommand().apply {
             addInitializePrinter()
         }.command)
@@ -182,7 +183,10 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             addPrint(1, 1)
         }.command
         try {
-            sendData(command)
+            val sendResult = sendData(command)
+            if (!sendResult) {
+                throw Exception("Port Exception")
+            }
         }catch (e:Exception){
             recordLog("sendTscDataByGraphicParam trow Exception = ${e.message}")
             result.code = Result.FAILURE
@@ -192,6 +196,22 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         return result
     }
     //</editor-fold desc="Tsc">
+
+    protected fun sendEscDataByCommandParam(param: GPrinterMission, clearCache: Boolean = true): Result {
+        val result = Result()
+        if (clearCache) initPrinter()
+        try {
+            val sendResult = sendData(param.command)
+            if (!sendResult) {
+                throw Exception("Port Exception")
+            }
+        }catch (e:Exception){
+            recordLog("sendEscDataByCommandParam trow Exception = ${e.message}")
+            result.code = Result.FAILURE
+            result.msg = e.message ?: ""
+        }
+        return result
+    }
 
     /**
      * 发送指令

@@ -1,6 +1,6 @@
 package com.eiviayw.print.bean.mission
 
-import com.eiviayw.print.base.BaseParam
+import com.eiviayw.print.base.BaseMission
 
 /**
  * 指路：https://github.com/Yiwei099
@@ -17,7 +17,7 @@ class GraphicMission(
     val onceLength: Int = 500,
     private val criticalHeight: Int = 1500,
     val graphicQuality: Int = 100,//图像质量：0～100
-) : BaseParam() {
+) : BaseMission() {
 
     /**
      * 是否需要切割

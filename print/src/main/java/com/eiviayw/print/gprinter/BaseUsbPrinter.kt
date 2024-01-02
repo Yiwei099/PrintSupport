@@ -5,8 +5,8 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.text.TextUtils
 import com.eiviayw.print.bean.Result
-import com.eiviayw.print.bean.mission.CommandMission
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.io.UsbPort
 import com.gprinter.utils.CallbackListener
@@ -55,9 +55,13 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
                     }
                 }
 
-                is CommandMission -> {
+                is GPrinterMission -> {
                     //指令模式
-                    Result()
+                    if (commandType() == Command.ESC){
+                        sendEscDataByCommandParam(param)
+                    }else{
+                        Result()
+                    }
                 }
 
                 else -> {

@@ -13,6 +13,7 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.print.bean.mission.GraphicMission
+import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.eiviayw.print.gprinter.BaseGPrinter
 import com.eiviayw.print.gprinter.EscNetGPrinter
 import com.eiviayw.print.gprinter.EscUsbGPrinter
@@ -125,6 +126,18 @@ class GPrinterActivity : AppCompatActivity() {
                     }
                 }
             }
+
+            btOpenBox.setOnClickListener {
+                if (rbNet.isChecked && !TextUtils.isEmpty(getPrinterKey())) {
+                    startOpenBoxByNet()
+                }
+
+                val usbCheckID = rgUsbDevice.checkedRadioButtonId
+                if (rbUsb.isChecked && usbCheckID != -1) {
+                    val usbKey = findViewById<RadioButton>(usbCheckID).text.toString()
+                    startOpenBoxByUsb(usbKey)
+                }
+            }
         }
 
         usbBroadcastReceiver.setOnUsbReceiveListener(object :
@@ -134,7 +147,7 @@ class GPrinterActivity : AppCompatActivity() {
             }
 
             override fun onUsbDetached(intent: Intent) {
-//                viewBinding.btUsbDevice.performClick()
+                viewBinding.btUsbDevice.performClick()
             }
 
             override fun onUsbPermission(intent: Intent) {
@@ -159,11 +172,15 @@ class GPrinterActivity : AppCompatActivity() {
         )
         val copies = getPrintCopies()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicMission(getPrintData()).apply {
-                id = "${index.plus(1)}/$copies"
-                count = copies
-                this.index = index
-            })
+            if (viewBinding.rbText.isChecked){
+                printer?.addMission(GPrinterMission(PrintDataProvide.getInstance().getCommand()))
+            }else{
+                printer?.addMission(GraphicMission(getPrintData()).apply {
+                    id = "${index.plus(1)}/$copies"
+                    count = copies
+                    this.index = index
+                })
+            }
         }
     }
 
@@ -186,6 +203,31 @@ class GPrinterActivity : AppCompatActivity() {
                 this.index = index
             })
         }
+    }
+
+    private fun startOpenBoxByNet(){
+        destroyCachePrinter(
+            newPrinter = EscNetGPrinter(
+                this,
+                getPrinterKey()
+            )
+        )
+
+        printer?.addMission(GPrinterMission(GPrinterMission.getOpenBoxCommand()))
+    }
+
+    private fun startOpenBoxByUsb(usbKey: String){
+        val split = usbKey.split("-")
+        destroyCachePrinter(
+            newTag = usbKey,
+            newPrinter =  EscUsbGPrinter(
+                this,
+                split[0].toInt(),
+                split[1].toInt()
+            )
+        )
+
+        printer?.addMission(GPrinterMission(GPrinterMission.getOpenBoxCommand()))
     }
 
     private fun getPrintData() = if (isEsc){

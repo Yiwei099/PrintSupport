@@ -29,7 +29,7 @@ open class BasePrinter(
 ) : PrinterInterface {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var timer: Timer? = null
-    private val mission by lazy { LinkedBlockingDeque<BaseParam>() }
+    private val mission by lazy { LinkedBlockingDeque<BaseMission>() }
 
     //<editor-fold desc="回调函数">
     /**
@@ -40,7 +40,7 @@ open class BasePrinter(
     /**
      * 执行状态监听
      */
-    private var printListener: ((BaseParam?, Result) -> Unit)? = null
+    private var printListener: ((BaseMission?, Result) -> Unit)? = null
     //</editor-fold desc="回调函数">
 
     /**
@@ -110,7 +110,7 @@ open class BasePrinter(
         connectListener = l
     }
 
-    fun setOnPrintListener(l: (BaseParam?, Result) -> Unit) {
+    fun setOnPrintListener(l: (BaseMission?, Result) -> Unit) {
         printListener = l
     }
 
@@ -119,7 +119,7 @@ open class BasePrinter(
      * 添加任务到队列中
      * @param mission 任务
      */
-    override fun addMission(mission: BaseParam) {
+    override fun addMission(mission: BaseMission) {
         this.mission.addLast(mission)
         startTimer()
         recordLog("成功添加$mission")
