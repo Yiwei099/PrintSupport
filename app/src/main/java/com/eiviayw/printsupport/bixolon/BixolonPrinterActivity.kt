@@ -2,6 +2,7 @@ package com.eiviayw.printsupport.bixolon
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eiviayw.print.bean.mission.GraphicMission
@@ -57,6 +58,22 @@ class BixolonPrinterActivity : AppCompatActivity() {
             btDestroy.setOnClickListener {
                 printer?.onDestroy()
                 printer = null
+            }
+
+            btNetDevice.setOnClickListener {
+                viewBinding.rgNetDevice.removeAllViews()
+                printer =
+                    BixolonNetLabelPrinter(this@BixolonPrinterActivity, "192.168.3.10").apply {
+                        setOnFindPrinterCallBack {
+                            it.forEach {content->
+                                viewBinding.rgNetDevice.addView(RadioButton(this@BixolonPrinterActivity).apply {
+                                    text = content
+                                })
+                            }
+                        }
+                    }
+
+                printer?.startFindPrinter()
             }
         }
     }

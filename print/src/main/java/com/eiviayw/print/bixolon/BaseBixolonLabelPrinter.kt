@@ -32,6 +32,7 @@ abstract class BaseBixolonLabelPrinter(
     private var failureTimes = 0
     private var job: Job? = null
     private var printJob: Job? = null
+    private var findJob: Job? = null
 
     //<editor-fold desc="打印机对象">
     protected val printer by lazy { BixolonLabelPrinter(mContext, handler, Looper.getMainLooper()) }
@@ -98,9 +99,8 @@ abstract class BaseBixolonLabelPrinter(
                 val result = msg.obj as String
                 if (!TextUtils.isEmpty(result)) {
                     val netData = BixolonUtils.getInstance().handleFindNetData(result)
-                    if (netData != null) {
-//                        findNetPrinterCallBack(netData)
-                    }
+                    findPrinterCallBack?.invoke(netData)
+                    cancelFindJob()
                 }
                 recordLog("netWork device set：$result")
             }
@@ -108,6 +108,26 @@ abstract class BaseBixolonLabelPrinter(
         true
     }
 
+    private var findPrinterCallBack: ((List<String>) -> Unit)? = null
+
+    fun setOnFindPrinterCallBack(f:(List<String>) -> Unit){
+        findPrinterCallBack = f
+    }
+
+    private fun cancelFindJob(){
+        findJob?.cancel()
+        findJob = null
+    }
+
+    fun startFindPrinter(){
+        if (findJob == null){
+            findJob = getMyScope().launch {
+                withContext(Dispatchers.IO) {
+                    printer.findNetworkPrinters(DEFAULT_FIND_OUT_TIME)
+                }
+            }
+        }
+    }
     //</editor-fold desc="打印机对象">
 
     /**
@@ -333,6 +353,7 @@ abstract class BaseBixolonLabelPrinter(
 
     companion object {
         const val TIMER_OUT = 5000
+        const val DEFAULT_FIND_OUT_TIME = 3
     }
 
 }

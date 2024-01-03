@@ -8,6 +8,7 @@
 
     <uses-permission android:name="android.hardware.usb.host" />
     <uses-permission android:name="android.hardware.usb.accessory" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
     <uses-feature
         android:name="android.hardware.usb.host"

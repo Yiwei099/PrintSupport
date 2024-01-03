@@ -32,7 +32,7 @@ implementation 'com.github.Yiwei099:PrintSupport:$releaseVersion'
 ### 1. GPrinter SDK(佳博)
 > 指路：[佳博打印机官网](https://cn.gainscha.com/default.php)  
 > 详细测试用例请看 **GPrinterActivity.kt**  
-> 调试状态：Esc✅，Tsc✅，局域网✅，USB✅，蓝牙✖️(手上一直没有可蓝牙通讯的打印机)  
+> 调试状态：Esc✅，Tsc✅，局域网✅，USB✅，蓝牙✖️，Esc图像✅，Esc指令✅，Tsc图像✅，Tsc指令✖️  
 > 实测此SDK可通讯大多数品牌的打印机；如：GPrinter(佳博)，XPrinter(芯烨)，Epson(爱普森)，Bixolon(必胜龙)，Element(元素)  
 
 #### a. 创建
@@ -66,7 +66,7 @@ printer.onDestroy()
 ### 2. Epson SDK(爱普森)
 > 指路：[Epson 打印机官网](https://www.epson.com.cn/)  
 > 详细测试用例请看 **EpsonPrinterActivity.kt**  
-> 调试状态：Esc✅，Tsc✖️，局域网✅，USB✅，蓝牙✖️  
+> 调试状态：Esc✅，Tsc✖️，局域网✅，USB✅，蓝牙✖️，Esc图像✅，Esc指令✖️，Tsc图像✅，Tsc指令✖️  
 > 实测只能与自己品牌的打印机通讯  
 
 #### a. 创建
@@ -95,11 +95,24 @@ printer.addMission(mission)
 ```
 printer.onDestroy()
 ```
+#### d. 检索打印机
+```
+//检索参数(局域网/蓝牙/USB)，(打印机/扫码枪/输入设备)
+val option = FilterOption()
+//监听结果(返回单个设备)
+val listener = DiscoveryListener()
 
-### 3.Bixolon(必胜龙)
+//开始检索
+Discovery.start(mContext,option,listener)
+
+//结束检索
+Discovery.stop()
+```
+
+### 3.Bixolon(必胜龙标签)
 > 指路：[Bixolon 打印机官网](https://cn.bixolon.com/company.php)  
 > 详细测试用例请看 **BixolonPrinterActivity.kt**  
-> 调试状态：Tsc✅，Esc✖️，局域网✅，USB✖️，蓝牙✖️
+> 调试状态：Tsc✅，Esc✖️，局域网✅，USB✖️，蓝牙✖️，Esc图像✖️，Esc指令✖️，Tsc图像✅，Tsc指令✖️
 
 #### a. 初始化JNI
 ```
@@ -122,6 +135,23 @@ printer.addMission(mission)
 #### d. 销毁(必要时)
 ```
 printer.onDestroy()
+```
+#### e. 检索 **Net** 打印机
+```
+//任意存在或不存在的IP地址
+val ip = "192.168.3.12"
+
+//创建任意必胜龙打印机
+val printer = BixolonNetLabelPrinter(mContext,ip).apply{
+    setOnFindPrinterCallBack {
+        it.forEach {content->
+            //返回的结果，结构为：macAddress + address + port
+        }
+    }
+}
+
+//开始检索
+printer.startFindPrinter()
 ```
 
 ## 常见问题

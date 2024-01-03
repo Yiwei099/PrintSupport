@@ -119,7 +119,7 @@
         android:layout_height="wrap_content"
         android:text="测试打印"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/llUsb" />
+        app:layout_constraintTop_toBottomOf="@id/llNet" />
 
     <Button
         android:id="@+id/btDestroy"
@@ -148,6 +148,29 @@
 
         <RadioGroup
             android:id="@+id/rgUsbDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llNet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llUsb">
+
+        <Button
+            android:id="@+id/btNetDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="获取Net设备" />
+
+        <RadioGroup
+            android:id="@+id/rgNetDevice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical" />
