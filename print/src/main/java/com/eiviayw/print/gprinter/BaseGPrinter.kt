@@ -46,7 +46,13 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
                 delay(1000)
             }
             setPrinterPort(createPort())
-            getPrinterPort()?.openPort()
+            val result = getPrinterPort()?.openPort() ?: false
+            if (result){
+                //连接成功
+                startPrintJob()
+            }else{
+                throw Exception()
+            }
         } catch (e: Exception) {
             getOnConnectListener()?.invoke(Result(Result.FAILURE, "连接异常：${e.message}"))
         }
@@ -54,6 +60,8 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
 
     abstract fun createPrinterDevice(): PrinterDevices
     abstract fun createPort(): PortManager
+
+    abstract fun startPrintJob()
 
     private fun setPrinterPort(port: PortManager) {
         portManager = port

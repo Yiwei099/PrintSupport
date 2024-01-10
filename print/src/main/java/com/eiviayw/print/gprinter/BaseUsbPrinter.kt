@@ -118,6 +118,10 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         return devices
     }
 
+    override fun startPrintJob() {
+        startPrintJob(true)
+    }
+
     override fun createPrinterDevice(): PrinterDevices = PrinterDevices.Build()
         .setContext(getContext())
         .setConnMethod(ConnMethod.USB)
@@ -132,17 +136,19 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
             }
 
             override fun onSuccess(printerDevices: PrinterDevices?) {
-                startPrintJob(true)
+
             }
 
             override fun onReceive(data: ByteArray?) {
             }
 
             override fun onFailure() {
+                //连接失败
                 cancelJob()
             }
 
             override fun onDisconnect() {
+                //主动断开连接
                 getPrinterPort()?.closePort()
                 cancelJob()
             }

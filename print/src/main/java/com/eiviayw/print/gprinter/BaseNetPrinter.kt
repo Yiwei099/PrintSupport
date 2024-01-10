@@ -12,6 +12,7 @@ import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -105,6 +106,26 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
         cancelJob()
     }
 
+    override fun startPrintJob() {
+        if (printJob == null){
+            printJob = getMyScope().launch {
+                withContext(Dispatchers.IO){
+                    delay(200)
+                    if (getPrinterPort()?.connectStatus == true){
+                        recordLog("connected")
+                        getOnConnectListener()?.invoke(Result())
+                        startPrint()
+                    }else{
+                        cancelJob()
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 查阅佳博SDK源码可知：EthernetPort.openPort 打开成功后只是在内部标记 getConnectStatus = true，所以我们无法从 CallBackListener 的某个具体方法中得到连接的结果
+     */
     override fun createPrinterDevice(): PrinterDevices = PrinterDevices.Build()
         .setContext(getContext())
         .setConnMethod(ConnMethod.WIFI)
@@ -113,14 +134,7 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
         .setCommand(Command.ESC)
         .setCallbackListener(object : CallbackListener {
             override fun onConnecting() {
-                getOnConnectListener()?.invoke(Result())
-                if (printJob == null){
-                    printJob = getMyScope().launch {
-                        withContext(Dispatchers.IO){
-                            startPrint()
-                        }
-                    }
-                }
+
             }
 
             override fun onCheckCommand() {
@@ -133,10 +147,14 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
             }
 
             override fun onFailure() {
+                //连接失败
                 cancelJob()
+                recordLog("connected failure")
+                getOnConnectListener()?.invoke(Result(Result.FAILURE))
             }
 
             override fun onDisconnect() {
+                //主动断开连接
                 cancelJob()
             }
         })
