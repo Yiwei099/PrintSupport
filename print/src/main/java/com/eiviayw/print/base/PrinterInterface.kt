@@ -11,4 +11,5 @@ package com.eiviayw.print.base
 interface PrinterInterface {
 
     fun addMission(mission: BaseMission)
+    fun addMission(missions:List<BaseMission>)
 }

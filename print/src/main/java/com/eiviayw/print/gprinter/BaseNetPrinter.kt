@@ -10,11 +10,6 @@ import com.gprinter.io.PortManager
 import com.gprinter.utils.CallbackListener
 import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 /**
@@ -29,16 +24,44 @@ import kotlinx.coroutines.withContext
 abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
 
     private var failureTimes = 0
-    private var printJob:Job? = null
-
-    override fun cancelJob(){
-        super.cancelJob()
-        printJob?.cancel()
-        printJob = null
-    }
 
     override fun createPort(): PortManager = EthernetPort(getPrinterDevice())
-    private suspend fun startPrint(){
+
+    private suspend fun missionSuccess() {
+        failureTimes = 0
+        if (isMissionEmpty()) {
+            printFinish()
+        } else {
+            removeHeaderMission()
+            if (!isMissionEmpty()) {
+                startPrintJob()
+            } else {
+                printFinish()
+            }
+        }
+    }
+
+    private suspend fun missionFailure(result:Result){
+        failureTimes += 1
+        if (isMaxRetry(failureTimes)){
+            //超过重试次数，打印失败回调
+            getOnPrintListener()?.invoke(getHeaderMission(), result)
+            //调用成功方法，销毁打印任务并打印失败次数
+            missionSuccess()
+        }else{
+            startPrintJob()
+        }
+    }
+
+    private fun printFinish() {
+        failureTimes = 0
+        //关闭端口
+        getPrinterPort()?.closePort()
+        //结束打印线程
+        cancelJob()
+    }
+
+    override suspend fun startPrintJob(delayTime:Long) {
         getMissionQueue().peekFirst()?.let {param->
             val result = when(param){
                 is GraphicMission ->{
@@ -67,58 +90,14 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
                 }
             }
 
-            getOnPrintListener()?.invoke(param,result)
             recordLog("打印结果$result,$param")
             if (result.isSuccess()){
+                //打印成功回调
+                getOnPrintListener()?.invoke(param,result)
                 missionSuccess()
             }else{
-                missionFailure()
-            }
-        }
-    }
-
-    private suspend fun missionSuccess() {
-        failureTimes = 0
-        if (isMissionEmpty()) {
-            printFinish()
-        } else {
-            removeHeaderMission()
-            if (!isMissionEmpty()) {
-                startPrint()
-            } else {
-                printFinish()
-            }
-        }
-    }
-
-    private suspend fun missionFailure(){
-        failureTimes += 1
-        if (isMaxRetry(failureTimes)){
-            missionSuccess()
-        }else{
-            startPrint()
-        }
-    }
-
-    private fun printFinish() {
-        failureTimes = 0
-        getPrinterPort()?.closePort()
-        cancelJob()
-    }
-
-    override fun startPrintJob() {
-        if (printJob == null){
-            printJob = getMyScope().launch {
-                withContext(Dispatchers.IO){
-                    delay(200)
-                    if (getPrinterPort()?.connectStatus == true){
-                        recordLog("connected")
-                        getOnConnectListener()?.invoke(Result())
-                        startPrint()
-                    }else{
-                        cancelJob()
-                    }
-                }
+                //失败暂时不回调
+                missionFailure(result)
             }
         }
     }

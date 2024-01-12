@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.text.TextUtils
+import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.Result
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.GPrinterMission
@@ -12,11 +13,7 @@ import com.gprinter.io.UsbPort
 import com.gprinter.utils.CallbackListener
 import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Created with Android Studio.
@@ -28,18 +25,6 @@ import kotlinx.coroutines.withContext
 abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
     private var failureTimes = 0
     private val usbService by lazy { getContext().getSystemService(Context.USB_SERVICE) as UsbManager }
-
-    private var printJob: Job? = null
-
-    override fun cancelJob() {
-        super.cancelJob()
-        cancelPrintJob()
-    }
-
-    private fun cancelPrintJob(){
-        printJob?.cancel()
-        printJob = null
-    }
 
     private suspend fun startPrint() {
         getMissionQueue().peekFirst()?.let { param ->
@@ -70,11 +55,12 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
                 }
             }
 
-            getOnPrintListener()?.invoke(param, result)
+
             if (result.isSuccess()) {
+                getOnPrintListener()?.invoke(param, result)
                 missionSuccess()
             } else {
-                missionFailure()
+                missionFailure(param,result)
             }
         }
     }
@@ -93,9 +79,10 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         }
     }
 
-    private suspend fun missionFailure() {
+    private suspend fun missionFailure(param: BaseMission, result: Result) {
         failureTimes += 1
         if (isMaxRetry(failureTimes)) {
+            getOnPrintListener()?.invoke(param, result)
             missionSuccess()
         } else {
             startPrint()
@@ -104,7 +91,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
 
     private fun printFinish() {
         failureTimes = 0
-//        getPrinterPort()?.closePort()
+        //取消打印线程但不关闭端口，只有打印机主动断开时才会断开：比如打印机关机，USB连接异常
         cancelJob()
     }
 
@@ -118,8 +105,10 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         return devices
     }
 
-    override fun startPrintJob() {
-        startPrintJob(true)
+    override suspend fun startPrintJob(delayTime:Long) {
+        //在打印机关闭状态下发起打印任务，连接成功直接打印时部分打印机会乱码(可能是打印机固件的Bug)，所以此时需要延迟一下，推荐时间为5s
+        if (delayTime > 0) delay(delayTime)
+        startPrint()
     }
 
     override fun createPrinterDevice(): PrinterDevices = PrinterDevices.Build()
@@ -171,24 +160,6 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         }
         recordLog("没找到${toString()}打印机")
         return null
-    }
-
-    override fun noLinkRequired(status: Boolean) {
-        super.noLinkRequired(status)
-        recordLog("noLinkRequired")
-        startPrintJob(false)
-    }
-
-    private fun startPrintJob(needDelay:Boolean){
-        if (printJob == null) {
-            printJob = getMyScope().launch {
-                withContext(Dispatchers.IO) {
-                    recordLog("startPrintJob")
-                    if (needDelay) delay(5000)
-                    startPrint()
-                }
-            }
-        }
     }
 
     private fun mateSerialNumber(s: String?): Boolean {

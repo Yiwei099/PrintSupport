@@ -13,6 +13,7 @@ import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
 import com.gprinter.command.LabelCommand
 import com.gprinter.io.PortManager
+import com.gprinter.utils.ConnMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,30 +39,12 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
 
     private var job: Job? = null
 
-    private suspend fun working() {
-        try {
-            //先close上次连接
-            if (getPrinterPort() != null) {
-                getPrinterPort()?.closePort()
-                delay(1000)
-            }
-            setPrinterPort(createPort())
-            val result = getPrinterPort()?.openPort() ?: false
-            if (result){
-                //连接成功
-                startPrintJob()
-            }else{
-                throw Exception()
-            }
-        } catch (e: Exception) {
-            getOnConnectListener()?.invoke(Result(Result.FAILURE, "连接异常：${e.message}"))
-        }
-    }
-
     abstract fun createPrinterDevice(): PrinterDevices
     abstract fun createPort(): PortManager
 
-    abstract fun startPrintJob()
+    open suspend fun startPrintJob(delayTime:Long = 0){
+
+    }
 
     private fun setPrinterPort(port: PortManager) {
         portManager = port
@@ -76,16 +59,37 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         startJob()
     }
 
+    /**
+     * 无论是USB还是NET打印机，任务队列空时都会取消 Job ，所以定时器轮询到有任务就一定会重新创建 Job
+     */
     private fun startJob() {
-        if (portManager?.connectStatus == true){
-            noLinkRequired(true)
-            return
-        }
-
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    working()
+                    try {
+                        if (portManager?.connectStatus == true){
+                            //USB打印结束后无需关闭端口，所以这里若连接状态正常就直接发起打印
+                            getOnConnectListener()?.invoke(Result())
+                            startPrintJob()
+                        }else{
+                            //先close上次连接，再进行连接
+                            getPrinterPort()?.closePort()
+                            delay(1000)
+
+                            setPrinterPort(createPort())
+                            val result = getPrinterPort()?.openPort() ?: false
+                            if (result){
+                                //连接成功
+                                getOnConnectListener()?.invoke(Result())
+
+                                startPrintJob(if(ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
+                            }else{
+                                throw Exception("打开打印机失败")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        getOnConnectListener()?.invoke(Result(Result.FAILURE, "连接异常：${e.message}"))
+                    }
                 }
             }
         }
@@ -231,7 +235,6 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     private fun sendData(command: Vector<Byte>) =
         portManager?.writeDataImmediately(command) ?: false
 
-    open fun noLinkRequired(status:Boolean){ }
     open fun getLabelDensity() = LabelCommand.DENSITY.DNESITY0
     open fun getLabelAdjustXPosition() = 0
     open fun getLabelAdjustYPosition() = 0

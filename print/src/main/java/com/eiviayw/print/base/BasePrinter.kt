@@ -126,6 +126,16 @@ open class BasePrinter(
     }
 
     /**
+     * 批量添加任务到队列中
+     * @param missions 批量任务
+     */
+    override fun addMission(missions: List<BaseMission>) {
+        this.mission.addAll(missions)
+        startTimer()
+        recordLog("批量添加${missions.size}个任务成功")
+    }
+
+    /**
      * 获取任务队列
      * @return 任务队列
      */
