@@ -6,6 +6,7 @@ import android.os.Looper
 import android.os.Message
 import android.text.TextUtils
 import com.bixolon.labelprinter.BixolonLabelPrinter
+import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.base.BasePrinter
 import com.eiviayw.print.bean.Result
 import com.eiviayw.print.bean.mission.GraphicMission
@@ -57,7 +58,7 @@ abstract class BaseBixolonLabelPrinter(
                     BixolonLabelPrinter.STATE_NONE -> {
                         //连接状态未知
                         recordLog("connect state false")
-                        getOnConnectListener()?.invoke(Result(Result.FAILURE))
+                        getOnConnectListener()?.invoke(Result(Result.CONNECT_FAILURE))
                         onConnectFailure()
                     }
                 }
@@ -262,7 +263,7 @@ abstract class BaseBixolonLabelPrinter(
                 getOnPrintListener()?.invoke(param, result)
                 missionSuccess()
             } else {
-                missionFailure()
+                missionFailure(param, result)
             }
         }
     }
@@ -280,8 +281,8 @@ abstract class BaseBixolonLabelPrinter(
                 printer.clearBuffer()
             } catch (e: Exception) {
                 recordLog("sendDataByGraphicParam trow Exception = ${e.message}")
-                result.code = Result.FAILURE
-                result.msg = e.message ?: ""
+                result.code = Result.PRINT_EXCEPTION
+                result.msg = e.message
             }
         }
         return result
@@ -301,10 +302,10 @@ abstract class BaseBixolonLabelPrinter(
         }
     }
 
-    private suspend fun missionFailure() {
+    private suspend fun missionFailure(mission:BaseMission,result: Result) {
         failureTimes += 1
         if (isMaxRetry(failureTimes)) {
-            getOnPrintListener()?.invoke(getHeaderMission(), Result(Result.FAILURE, "打印失败"))
+            getOnPrintListener()?.invoke(mission, result)
             missionSuccess()
         } else {
             startPrint()

@@ -66,10 +66,10 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
+                    val connectResult = Result()
                     try {
                         if (portManager?.connectStatus == true){
                             //USB打印结束后无需关闭端口，所以这里若连接状态正常就直接发起打印
-                            getOnConnectListener()?.invoke(Result())
                             startPrintJob()
                         }else{
                             //先close上次连接，再进行连接
@@ -84,11 +84,13 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
 
                                 startPrintJob(if(ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
                             }else{
-                                throw Exception("打开打印机失败")
+                                connectResult.code = Result.CONNECT_FAILURE
                             }
                         }
                     } catch (e: Exception) {
-                        getOnConnectListener()?.invoke(Result(Result.FAILURE, "连接异常：${e.message}"))
+                        connectResult.code = Result.CONNECT_EXCEPTION
+                    }finally {
+                        getOnConnectListener()?.invoke(connectResult)
                     }
                 }
             }
@@ -151,7 +153,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             }
         } catch (e: Exception) {
             recordLog("sendEscDataByGraphicParam trow Exception = ${e.message}")
-            result.code = Result.FAILURE
+            result.code = Result.PRINT_EXCEPTION
             result.msg = e.message ?: ""
         }
         return result
@@ -202,7 +204,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             }
         }catch (e:Exception){
             recordLog("sendTscDataByGraphicParam trow Exception = ${e.message}")
-            result.code = Result.FAILURE
+            result.code = Result.PRINT_EXCEPTION
             result.msg = e.message ?: ""
         }
 
@@ -222,7 +224,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             }
         }catch (e:Exception){
             recordLog("sendEscDataByCommandParam trow Exception = ${e.message}")
-            result.code = Result.FAILURE
+            result.code = Result.PRINT_EXCEPTION
             result.msg = e.message ?: ""
         }
         return result

@@ -58,7 +58,7 @@ abstract class BaseEpsonPrinter(
      */
     abstract fun createPrinter(): Printer
 
-    open fun onPrinterReceiverCallBack(
+    private fun onPrinterReceiverCallBack(
         printer: Printer?,
         p1: Int,
         p2: PrinterStatusInfo?,
@@ -70,7 +70,7 @@ abstract class BaseEpsonPrinter(
             getOnPrintListener()?.invoke(headerMission, Result())
             printSuccess()
         } else {
-            printFailure()
+            printFailure(p1)
         }
     }
 
@@ -103,13 +103,12 @@ abstract class BaseEpsonPrinter(
             startPrint()
         } catch (e: Epos2Exception) {
             recordLog("链接异常 - ${e.errorStatus}")
-            result.code = Result.FAILURE
-            result.msg = "链接异常 - ${e.errorStatus}"
+            result.code = Result.CONNECT_EXCEPTION
+            result.msg = e.errorStatus.toString()
             //连接失败必须取消并置空 Job。否则下次无法正常启动打印流程
             cancelJob()
         } finally {
             getOnConnectListener()?.invoke(result)
-
         }
     }
 
@@ -134,7 +133,7 @@ abstract class BaseEpsonPrinter(
      * 处理任务
      * @param mission 打印任务
      */
-    open suspend fun handleMission(mission: BaseMission) {
+    private suspend fun handleMission(mission: BaseMission) {
         when (mission) {
             is GraphicMission -> {
                 //图像模式
@@ -181,7 +180,7 @@ abstract class BaseEpsonPrinter(
         } catch (e: Exception) {
             val msg = e.message
             recordLog("sendDataByGraphicParam trow Exception = $msg")
-            getOnPrintListener()?.invoke(param, Result(Result.FAILURE, msg))
+            getOnPrintListener()?.invoke(param, Result(Result.PRINT_EXCEPTION, msg))
         } finally {
             dataBitmap.recycle()
         }
@@ -205,7 +204,7 @@ abstract class BaseEpsonPrinter(
         }catch (e:Exception){
             val msg = e.message
             recordLog("sendDataByCommand trow Exception = $msg")
-            getOnPrintListener()?.invoke(param, Result(Result.FAILURE, msg))
+            getOnPrintListener()?.invoke(param, Result(Result.PRINT_EXCEPTION, msg))
         }
     }
 
@@ -229,13 +228,13 @@ abstract class BaseEpsonPrinter(
     /**
      * 打印失败
      */
-    open fun printFailure() {
+    private fun printFailure(stateCode: Int) {
         failureTimes += 1
         val headerMission = getHeaderMission()
         recordLog("打印失败：$headerMission")
-        getOnPrintListener()?.invoke(headerMission, Result(Result.FAILURE))
 
         if (isMaxRetry(failureTimes)) {
+            getOnPrintListener()?.invoke(headerMission, Result(convertPrintExceptionCode(stateCode)))
             //超过重试次数走 Success 流程只是为了执行下一个任务
             printSuccess()
         } else {
@@ -255,8 +254,8 @@ abstract class BaseEpsonPrinter(
                 mPrinter.disconnect()
             }
         } catch (e: Exception) {
-            result.code = Result.FAILURE
-            result.msg = "断开连接异常：${e.message}"
+            result.code = Result.DISCONNECT_EXCEPTION
+            result.msg = e.message
         } finally {
             getOnConnectListener()?.invoke(result)
             cancelJob()
@@ -288,6 +287,30 @@ abstract class BaseEpsonPrinter(
     }
 
     fun getPrinterTarget() = interfaceType + target
+
+    /**
+     * 错误码转换
+     */
+    private fun convertPrintExceptionCode(state:Int) = when(state){
+        Epos2CallbackCode.CODE_ERR_AUTORECOVER -> Result.AUTO_RECOVER_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_COVER_OPEN -> Result.COVER_OPEN_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_CUTTER -> Result.CUTTER_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_MECHANICAL -> Result.MECHANICAL_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_EMPTY -> Result.PAPER_EMPTY_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_UNRECOVERABLE -> Result.UNRECOVERABLE_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_FAILURE -> Result.DOCUMENT_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_NOT_FOUND -> Result.PRINTER_NOT_FOUND_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_SYSTEM -> Result.PRINT_SYSTEM_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_PORT -> Result.PORT_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_TIMEOUT -> Result.PRINT_TIME_OUT_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_JOB_NOT_FOUND -> Result.JOB_ID_NOT_EXIST_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_SPOOLER -> Result.PRINT_QUEUE_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_BATTERY_LOW -> Result.BATTERY_EMPTY_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_TOO_MANY_REQUESTS -> Result.JOB_FULL_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_REQUEST_ENTITY_TOO_LARGE -> Result.DATA_OVERFLOW_EXCEPTION
+        Epos2CallbackCode.CODE_ERR_WAIT_REMOVAL -> Result.PARER_REMOVAL_EXCEPTION
+        else -> Result.FAILURE
+    }
 
     companion object {
         const val USB = "USB:"

@@ -129,7 +129,7 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
                 //连接失败
                 cancelJob()
                 recordLog("connected failure")
-                getOnConnectListener()?.invoke(Result(Result.FAILURE))
+                getOnConnectListener()?.invoke(Result(Result.CONNECT_FAILURE))
             }
 
             override fun onDisconnect() {
