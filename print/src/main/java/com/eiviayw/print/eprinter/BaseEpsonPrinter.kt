@@ -271,14 +271,23 @@ abstract class BaseEpsonPrinter(
         return statusInfo.connection == Printer.TRUE
     }
 
+    private fun cancelMainJob(){
+        job?.cancel()
+        job = null
+    }
+
     /**
      * 暂停当前打印流程
      */
     private fun cancelJob() {
-        job?.cancel()
-        job = null
+        cancelMainJob()
         printJob?.cancel()
         printJob = null
+    }
+
+    override fun resettingPrinter() {
+        super.resettingPrinter()
+        cancelMainJob()
     }
 
     override fun onDestroy() {

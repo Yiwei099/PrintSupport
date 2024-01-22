@@ -24,9 +24,10 @@ import kotlin.concurrent.fixedRateTimer
  */
 open class BasePrinter(
     private var openLog: Boolean = true,
-    private val tag: String = "",
-    private val maxRetryTimes: Int = 5
+    private var tag: String = "",
+    private var maxRetryTimes: Int = 5
 ) : PrinterInterface {
+    private var pollingDelay = UPDATE_TIMER_DELAY
     private val scope = CoroutineScope(Dispatchers.IO)
     private var timer: Timer? = null
     private val mission by lazy { LinkedBlockingDeque<BaseMission>() }
@@ -53,8 +54,36 @@ open class BasePrinter(
         }
     }
 
+    /**
+     * 日志输出状态
+     * @param state true-输出；false-不输出
+     */
     fun setLogState(state:Boolean){
         openLog = state
+    }
+
+    /**
+     * 自定义打印机标识
+     * @param tag 标识
+     */
+    fun setPrinterTag(tag: String){
+        this.tag = tag
+    }
+
+    /**
+     * 最大打印异常次数
+     * @param times 次数
+     */
+    fun setRetryTimes(times: Int){
+        maxRetryTimes = times
+    }
+
+    /**
+     * 任务定时器轮询间隔
+     * @param time 轮询间隔时间
+     */
+    fun setTimerDelay(time:Long){
+        pollingDelay = time
     }
 
     /**
@@ -65,12 +94,12 @@ open class BasePrinter(
     protected fun isMaxRetry(times: Int) = times == maxRetryTimes
     protected fun getMyScope() = scope
 
-    protected fun startTimer() {
+    private fun startTimer() {
         if (timer != null) {
             recordLog("timer is running")
             return
         }
-        timer = fixedRateTimer("", false, 0, UPDATE_TIMER_DELAY) {
+        timer = fixedRateTimer("", false, 0, pollingDelay) {
             if (!isMissionEmpty()) {
                 handlerTimerDo()
             }else{
@@ -93,6 +122,13 @@ open class BasePrinter(
     }
 
     open fun handlerTimerDo() {
+
+    }
+
+    /**
+     * 重置打印机任务执行状态
+     */
+    open fun resettingPrinter(){
 
     }
 

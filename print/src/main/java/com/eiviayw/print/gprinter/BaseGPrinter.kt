@@ -53,7 +53,6 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     protected fun getPrinterPort() = portManager
     open fun getPrinterDevice() = createPrinterDevice()
 
-
     override fun handlerTimerDo() {
         super.handlerTimerDo()
         startJob()
@@ -104,6 +103,11 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelJob()
+    }
+
+    override fun resettingPrinter() {
+        super.resettingPrinter()
         cancelJob()
     }
 

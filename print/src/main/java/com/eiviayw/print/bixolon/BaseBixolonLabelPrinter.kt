@@ -318,9 +318,13 @@ abstract class BaseBixolonLabelPrinter(
         cancelJob()
     }
 
-    private fun cancelJob() {
+    private fun cancelMainJob(){
         job?.cancel()
         job = null
+    }
+
+    private fun cancelJob() {
+        cancelMainJob()
         printJob?.cancel()
         printJob = null
         recordLog("on job cancel")
@@ -344,6 +348,11 @@ abstract class BaseBixolonLabelPrinter(
     override fun onDestroy() {
         super.onDestroy()
         cancelJob()
+    }
+
+    override fun resettingPrinter() {
+        super.resettingPrinter()
+        cancelMainJob()
     }
 
     open fun getAdjustXPosition(): Int = 0
