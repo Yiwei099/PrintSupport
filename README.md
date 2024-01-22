@@ -168,4 +168,19 @@ printer.startFindPrinter()
 BixolonUtils.getInstance().initLibrary()
 ```
 
+### 3. 高版本 Android 系统中使用 **USB** 通讯模式发起打印时打印机没有反馈
+> 检查是否已经对当前 USB 设备授权；若没有授权，建议在 Activity 中的生命周期中使用广播接收器，在 USB 设备接入时发起权限申请(即使是 USB 接触不良，自动断开/接入 也能自动发起)   
+```
+override fun onUsbAttached(intent: Intent) {
+    intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)?.let {usbDevice->
+        val b = usbManager.hasPermission(usbDevice)
+        val usbKey = "${usbDevice.vendorId}-${usbDevice.productId}"
+        if (!b){
+            val mPermissionIntent = PendingIntent.getBroadcast(this,0,Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION),0)
+            usbManager.requestPermission(it, mPermissionIntent)
+            //授权后无需再进行任何操作，打印机内部会定时轮询自动执行打印
+        }
+}
+```
+
 ## Print support by android(不定期更新)  
