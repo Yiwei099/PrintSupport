@@ -43,7 +43,7 @@ val key = "192.168.100.150"
 val printer = EscNetGPrinter(context, netKey) //打印Esc
 val printer = TscNetGPrinter(context,netKey) //打印Tsc
 
-//USB通讯
+//USB通讯(SerialNumber为可选)
 val usbKey = "vendorId+productId+SerialNumber"
 val printer = EscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Esc
 val printer = TscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Tsc
@@ -53,7 +53,7 @@ val printer = TscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Ts
 //以图片的形式打印
 val mission = GraphicMission(bitmapArray)
 
-//以打印SDK指令组装的文本指令
+//以SDK指令形式打印
 val mission = CommandMission(escCommand)
 
 //调用addMission即可
@@ -67,7 +67,7 @@ printer.onDestroy()
 ### 2. Epson SDK(爱普森)
 > 指路：[Epson 打印机官网](https://www.epson.com.cn/)  
 > 详细测试用例请看 **EpsonPrinterActivity.kt**  
-> 调试状态：Esc✅，Tsc✖️，局域网✅，USB✅，蓝牙✖️，Esc图像✅，Esc指令✖️，Tsc图像✅，Tsc指令✖️  
+> 调试状态：Esc✅，Tsc✖️，局域网✅，USB✅，蓝牙✖️，Esc图像✅，Esc指令✅(部分)，Tsc图像✅，Tsc指令✖️  
 > 实测只能与自己品牌的打印机通讯  
 
 #### a. 创建
@@ -86,8 +86,12 @@ val printer = EpsonPrinter(context,interface,target)
 //以图片的形式打印
 val mission = GraphicMission(bitmapArray)
 
-//以打印SDK指令组装的文本指令
-...
+//以SDK指令形式打印
+val mission = EpsonMission(
+                mutableListOf<BaseEpsonMissionParam>().apply {
+                    add(CommandMissionParam(getOpenBoxCommandByByteArray()))
+                }
+              )
 
 //调用addMission即可
 printer.addMission(mission)
@@ -155,6 +159,28 @@ val printer = BixolonNetLabelPrinter(mContext,ip).apply{
 printer.startFindPrinter()
 ```
 
+### 4.打开钱箱
+> 开钱箱的Byte指令从佳博SDK中获得，不一定适用所有打印机，若该指令无效请使用自己已测试通过的指令数组再使用本库发送  
+```
+//佳博打印机开钱箱
+printer.addMission(GPrinterMission(GPrinterMission.getOpenBoxCommand()))
+
+//其它打印机开钱箱：如 Epson
+printer.addMission(
+    EpsonMission(
+        mutableListOf<BaseEpsonMissionParam>().apply {
+            add(CommandMissionParam(getOpenBoxCommandByByteArray()))
+        }
+    )
+)
+
+//佳博SDK开钱箱Byte指令
+private fun getOpenBoxCommandByByteArray(): ByteArray {
+    return SDKUtils.convertVectorByteToBytes(GPrinterMission.getOpenBoxCommand())
+}
+                
+```
+
 ## 常见问题
 ### 1. 标签打印图片时宽不完整
 > ① 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围(如我所用于调试打印的标签 LabelProvide()，创建的图片宽度为 300 )  
@@ -169,7 +195,9 @@ BixolonUtils.getInstance().initLibrary()
 ```
 
 ### 3. 高版本 Android 系统中使用 **USB** 通讯模式发起打印时打印机没有反馈
-> 检查是否已经对当前 USB 设备授权；若没有授权，建议在 Activity 中的生命周期中使用广播接收器，在 USB 设备接入时发起权限申请(即使是 USB 接触不良，自动断开/接入 也能自动发起)   
+> ① 检查是否已经对当前 USB 设备授权；若没有授权，建议在 Activity 中的生命周期中使用广播接收器，在 USB 设备接入时发起权限申请(即使是 USB 接触不良，自动断开/接入 也能自动发起)  
+> ② 佳博SDK内也会自动帮我们申请，但只有在发起连接时才会，不发起打印就不会发起连接，也就无法申请权限，可能会造成漏打  
+> ③ 有的设备系统可以设置 USB 白名单，无需授权即可访问 USB 设备  
 ```
 override fun onUsbAttached(intent: Intent) {
     intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)?.let {usbDevice->
