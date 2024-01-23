@@ -150,6 +150,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         val iterator = deviceList.values.iterator()
         while (iterator.hasNext()) {
             val it = iterator.next()
+            recordLog("${it.vendorId}-${it.productId}")
             if (getDeviceVID() == it.vendorId
                 && getDevicePID() == it.productId
 //                && mateSerialNumber(it.serialNumber) //没有权限时是不允许获取序列号的，所以当前版本先不使用序列号作为设备唯一标识判断；还有就是芯烨的打印机序列号会重复(可能需要使用厂家工具进行自定义设置)

@@ -42,7 +42,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     abstract fun createPrinterDevice(): PrinterDevices
     abstract fun createPort(): PortManager
 
-    open suspend fun startPrintJob(delayTime:Long = 0){
+    open suspend fun startPrintJob(delayTime: Long = 0) {
 
     }
 
@@ -67,29 +67,34 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
                 withContext(Dispatchers.IO) {
                     val connectResult = Result()
                     try {
-                        if (portManager?.connectStatus == true){
+                        if (portManager?.connectStatus == true) {
                             //USB打印结束后无需关闭端口，所以这里若连接状态正常就直接发起打印
                             startPrintJob()
-                        }else{
+                        } else {
                             //先close上次连接，再进行连接
                             getPrinterPort()?.closePort()
                             delay(1000)
 
                             setPrinterPort(createPort())
                             val result = getPrinterPort()?.openPort() ?: false
-                            if (result){
+                            if (result) {
                                 //连接成功
-                                getOnConnectListener()?.invoke(Result())
-
-                                startPrintJob(if(ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
-                            }else{
+                                getOnConnectListener()?.invoke(connectResult)
+                                startPrintJob(if (ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
+                            } else {
                                 connectResult.code = Result.CONNECT_FAILURE
                             }
                         }
                     } catch (e: Exception) {
                         connectResult.code = Result.CONNECT_EXCEPTION
+                        recordLog("to connect throw exception = ${e.message}")
                     }finally {
-                        getOnConnectListener()?.invoke(connectResult)
+                        //回调结果
+                        if(!connectResult.isSuccess()){
+                            getOnConnectListener()?.invoke(connectResult)
+                            //连接失败重置连接任务线程
+                            cancelJob()
+                        }
                     }
                 }
             }
@@ -119,7 +124,10 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
      * @param clearCache 发送数据前时候先清除打印机缓冲区数据
      * @return 打印结果 true-打印成功；false-打印异常
      */
-    protected fun sendEscDataByGraphicParam(param: GraphicMission, clearCache: Boolean = true): Result {
+    protected fun sendEscDataByGraphicParam(
+        param: GraphicMission,
+        clearCache: Boolean = true
+    ): Result {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         try {
@@ -129,7 +137,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
                 bitmaps.forEachIndexed { index, bitmap ->
                     if (clearCache) initPrinter()
                     val bitmapCommand = convertBitmapToCommand(bitmap)
-                    if (index == bitmaps.size -1){
+                    if (index == bitmaps.size - 1) {
                         //最后一段加入切纸与留白
                         bitmapCommand.addPrintAndFeedLines(4)
                         bitmapCommand.addCutPaper()
@@ -183,7 +191,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     //</editor-fold desc= "Esc">
 
     //<editor-fold desc="Tsc">
-    protected fun sendTscDataByGraphicParam(param: GraphicMission):Result{
+    protected fun sendTscDataByGraphicParam(param: GraphicMission): Result {
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         val command = LabelCommand().apply {
@@ -206,7 +214,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
             if (!sendResult) {
                 throw Exception("Port Exception")
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             recordLog("sendTscDataByGraphicParam trow Exception = ${e.message}")
             result.code = Result.PRINT_EXCEPTION
             result.msg = e.message ?: ""
@@ -216,7 +224,10 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     }
     //</editor-fold desc="Tsc">
 
-    protected fun sendEscDataByCommandParam(param: GPrinterMission, clearCache: Boolean = true): Result {
+    protected fun sendEscDataByCommandParam(
+        param: GPrinterMission,
+        clearCache: Boolean = true
+    ): Result {
         val result = Result()
         if (clearCache) initPrinter()
         try {
@@ -226,7 +237,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
                     throw Exception("Port Exception")
                 }
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             recordLog("sendEscDataByCommandParam trow Exception = ${e.message}")
             result.code = Result.PRINT_EXCEPTION
             result.msg = e.message ?: ""
