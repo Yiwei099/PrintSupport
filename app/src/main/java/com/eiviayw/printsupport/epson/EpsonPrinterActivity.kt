@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.epson.BaseEpsonMissionParam
 import com.eiviayw.print.bean.mission.command.epson.DrawerMissionParam
@@ -111,13 +112,12 @@ class EpsonPrinterActivity : AppCompatActivity() {
     private fun startPrintByNet() {
         destroyCachePrinter()
         val copies = getPrintCopies()
+        val missionList = mutableListOf<BaseMission>()
         for (index in 0 until copies) {
-            printer?.addMission(GraphicMission(bitmapData).apply {
-                id = "${index.plus(1)}/$copies"
-                count = copies
-                this.index = index
-            })
+            missionList.add(GraphicMission(bitmapData))
         }
+
+        printer?.addMission(missionList)
     }
 
     private fun startOpenBoxByNet() {

@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.eiviayw.print.gprinter.BaseGPrinter
@@ -147,7 +148,7 @@ class GPrinterActivity : AppCompatActivity() {
             }
 
             override fun onUsbDetached(intent: Intent) {
-                viewBinding.btUsbDevice.performClick()
+//                viewBinding.btUsbDevice.performClick()
             }
 
             override fun onUsbPermission(intent: Intent) {
@@ -171,17 +172,16 @@ class GPrinterActivity : AppCompatActivity() {
             ) else TscNetGPrinter(this, getPrinterKey())
         )
         val copies = getPrintCopies()
+        val missionList = mutableListOf<BaseMission>()
+
         for (index in 0 until copies) {
             if (viewBinding.rbText.isChecked){
-                printer?.addMission(GPrinterMission(PrintDataProvide.getInstance().getCommand()))
+                missionList.add(GPrinterMission(PrintDataProvide.getInstance().getCommand()))
             }else{
-                printer?.addMission(GraphicMission(getPrintData()).apply {
-                    id = "${index.plus(1)}/$copies"
-                    count = copies
-                    this.index = index
-                })
+                missionList.add(GraphicMission(getPrintData()))
             }
         }
+        printer?.addMission(missionList)
     }
 
     private fun startPrintByUsb(usbKey: String) {
@@ -251,6 +251,9 @@ class GPrinterActivity : AppCompatActivity() {
                         baseParam?.let {
                             showLog("${it.id} - ${result.isSuccess()}")
                         }
+                    }
+                    setOnConnectListener {
+                        showLog("${it.isSuccess()}")
                     }
                 }
             }
