@@ -13,7 +13,7 @@ import com.eiviayw.print.bean.mission.command.epson.EpsonMission
 import com.eiviayw.print.eprinter.BaseEpsonPrinter
 import com.eiviayw.print.eprinter.EpsonPrinter
 import com.eiviayw.printsupport.BuildConfig
-import com.eiviayw.printsupport.PrintDataProvide
+import com.eiviayw.printsupport.provide.PrintDataProvide
 import com.eiviayw.printsupport.R
 import com.eiviayw.printsupport.databinding.ActivityEpsonPrinterBinding
 

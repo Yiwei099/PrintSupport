@@ -1,4 +1,4 @@
-package com.eiviayw.printsupport
+package com.eiviayw.printsupport.provide
 
 import android.graphics.Typeface
 import com.eiviayw.library.Constant
@@ -22,7 +22,7 @@ import java.util.Vector
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  * 打印数据提供者
  */
-class PrintDataProvide private constructor():BaseProvide(BitmapOption()) {
+class PrintDataProvide private constructor():BaseProvide(BitmapOption(maxWidth = 384)) {
     companion object {
         @Volatile
         private var instance: PrintDataProvide? = null
@@ -398,7 +398,7 @@ class PrintDataProvide private constructor():BaseProvide(BitmapOption()) {
 
     private fun generateOrder() = Order(
         orderType = "Dine in",
-        orderNo = "RO2023112214162097857023-012345678中哈哈是的cdefghijklmnopqrstuvwxyz",
+        orderNo = "RO23132",
         tableNo = "J-1",
         orderTime = "2023-12-02 17:20",
         subTotal = "$100.50",

@@ -1,4 +1,4 @@
-package com.eiviayw.printsupport
+package com.eiviayw.printsupport.provide
 
 import android.graphics.Typeface
 import com.eiviayw.library.Constant
@@ -42,7 +42,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
     }
 
     private fun start(): ByteArray {
-        val params = convertDrawParam()
+        val params = covertYDTDrawParam()
         return startDraw(params)
     }
 
@@ -103,6 +103,90 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
                     align = Constant.Companion.Align.ALIGN_END
                 )
             )
+        )
+    }
+
+    private fun covertYDTDrawParam() = mutableListOf<BaseParam>().apply {
+        add(
+            TextParam(
+                text = "衣点通"
+            ).apply {
+                size = 30f
+                typeface = Typeface.DEFAULT_BOLD
+                align = Constant.Companion.Align.ALIGN_CENTER
+            }
+        )
+
+        add(
+            TextParam(
+                text = "毛衣"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "尺码：S"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "颜色：黑色"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "零售价：100"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "折后价：100"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "款号：001"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "品牌：衣点通"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "产品标准：GB/T22-21"
+            ).apply {
+                size = 30f
+            }
+        )
+
+        add(
+            TextParam(
+                text = "质量等级：优"
+            ).apply {
+                size = 30f
+            }
         )
     }
 

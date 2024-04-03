@@ -195,6 +195,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         val command = LabelCommand().apply {
+//            addSize(40,60)
             addDirection(
                 LabelCommand.DIRECTION.BACKWARD,
                 LabelCommand.MIRROR.NORMAL

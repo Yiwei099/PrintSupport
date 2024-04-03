@@ -9,7 +9,7 @@ import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bixolon.BaseBixolonLabelPrinter
 import com.eiviayw.print.bixolon.BixolonNetLabelPrinter
 import com.eiviayw.print.bixolon.BixolonUsbLabelPrinter
-import com.eiviayw.printsupport.LabelProvide
+import com.eiviayw.printsupport.provide.LabelProvide
 import com.eiviayw.printsupport.databinding.ActivityBixolonPrinterBinding
 
 

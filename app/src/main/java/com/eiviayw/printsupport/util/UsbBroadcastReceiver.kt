@@ -1,4 +1,4 @@
-package com.eiviayw.printsupport
+package com.eiviayw.printsupport.util
 
 import android.content.BroadcastReceiver
 import android.content.Context
