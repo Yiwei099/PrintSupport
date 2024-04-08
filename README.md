@@ -33,7 +33,7 @@ implementation 'com.github.Yiwei099:PrintSupport:$releaseVersion'
 ### 1. GPrinter SDK(佳博)
 > 指路：[佳博打印机官网](https://cn.gainscha.com/default.php)  
 > 详细测试用例请看 **GPrinterActivity.kt**  
-> 调试状态：Esc✅，Tsc✅，局域网✅，USB✅，蓝牙✖️，Esc图像✅，Esc指令✅，Tsc图像✅，Tsc指令✖️  
+> 调试状态：Esc✅，Tsc✅，局域网✅，USB✅，蓝牙✅，Esc图像✅，Esc指令✅，Tsc图像✅，Tsc指令✖️  
 > 实测此SDK可通讯大多数品牌的打印机；如：GPrinter(佳博)，XPrinter(芯烨)，Epson(爱普森)，Bixolon(必胜龙)，Element(元素)  
 
 #### a. 创建
@@ -47,6 +47,11 @@ val printer = TscNetGPrinter(context,netKey) //打印Tsc
 val usbKey = "vendorId+productId+SerialNumber"
 val printer = EscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Esc
 val printer = TscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Tsc
+
+//蓝牙通讯
+val macAddress = "66:22:E2:4C:CB:DD"
+val printer = EscBtGPrinter(context,macAddress)
+val printer = TscBtGPrinter(context,macAddress)
 ```
 #### b. 打印
 ```
