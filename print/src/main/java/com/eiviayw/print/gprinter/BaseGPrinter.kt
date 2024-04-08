@@ -109,6 +109,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     override fun onDestroy() {
         super.onDestroy()
         cancelJob()
+        getPrinterPort()?.closePort()
     }
 
     override fun resettingPrinter() {
