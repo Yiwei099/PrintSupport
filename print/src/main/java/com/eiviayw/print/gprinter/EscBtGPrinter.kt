@@ -5,10 +5,9 @@ import com.gprinter.utils.Command
 
 class EscBtGPrinter(
     private val mContext: Context,
-    private val command: Command,
     private val macAddress:String
 ):BaseBtPrinter() {
-    override fun commandType(): Command = command
+    override fun commandType(): Command = Command.ESC
 
     override fun getMacAddress(): String = macAddress
 

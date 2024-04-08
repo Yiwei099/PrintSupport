@@ -82,7 +82,7 @@ abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
 
     private fun printFinish() {
         failureTimes = 0
-        //关闭端口
+        //关闭端口(蓝牙打印不建议打完就断开，连接太浪费资源)
 //        getPrinterPort()?.closePort()
         //结束打印线程
         cancelJob()
