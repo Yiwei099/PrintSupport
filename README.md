@@ -187,9 +187,11 @@ private fun getOpenBoxCommandByByteArray(): ByteArray {
 ```
 
 ## 常见问题
-### 1. 标签打印图片时宽不完整
-> ① 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围(如我所用于调试打印的标签 LabelProvide()，创建的图片宽度为 300 )  
-> ② 指路生成图片工具：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
+### 1. 标签打印图片时宽不完整(以 dpi 为 203 的打印机举例，1mm = 8)
+> ① 调整生成图片时的宽度，控制调试在标签打印机的有效打印范围 
+> ② 指路生成图片工具：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)  
+> ③ 市场常见小票纸尺寸为58和80，所以使用 DrawingSupport 生成图片的最大宽度为 48*8 = 384 和 72*8 = 576  
+> ④ 市场常见的标签纸尺寸为 40*30，40*60，40*80；以 40*60 的尺寸为例，宽 = 40*8 = 320，高 = 60*8 = 480；所以使用 DrawingSupport 生成图片的尺寸为 320*480
 ![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/printer_width.png)
 
 ### 2. 使用 Bixolon(必胜龙)标签打印机SDK 时崩溃
