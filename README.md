@@ -50,8 +50,8 @@ val printer = TscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Ts
 
 //蓝牙通讯
 val macAddress = "66:22:E2:4C:CB:DD"
-val printer = EscBtGPrinter(context,macAddress)
-val printer = TscBtGPrinter(context,macAddress)
+val printer = EscBtGPrinter(context,macAddress) //打印Esc
+val printer = TscBtGPrinter(context,macAddress) //打印Tsc
 ```
 #### b. 打印
 ```
