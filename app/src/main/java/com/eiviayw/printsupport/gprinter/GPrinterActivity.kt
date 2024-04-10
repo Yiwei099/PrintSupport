@@ -1,7 +1,11 @@
 package com.eiviayw.printsupport.gprinter
 
+import android.Manifest
 import android.app.PendingIntent
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
@@ -11,21 +15,31 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.eiviayw.print.gprinter.BaseGPrinter
+import com.eiviayw.print.gprinter.EscBtGPrinter
 import com.eiviayw.print.gprinter.EscNetGPrinter
 import com.eiviayw.print.gprinter.EscUsbGPrinter
+import com.eiviayw.print.gprinter.TscBtGPrinter
 import com.eiviayw.print.gprinter.TscNetGPrinter
 import com.eiviayw.print.gprinter.TscUsbGPrinter
 import com.eiviayw.printsupport.BuildConfig
+import com.eiviayw.printsupport.PermissionUtil
+import com.eiviayw.printsupport.R
+import com.eiviayw.printsupport.databinding.ActivityGprinterBinding
 import com.eiviayw.printsupport.provide.LabelProvide
 import com.eiviayw.printsupport.provide.PrintDataProvide
-import com.eiviayw.printsupport.R
+import com.eiviayw.printsupport.util.BlueToothBroadcastReceiver
+import com.eiviayw.printsupport.util.BlueToothHelper
 import com.eiviayw.printsupport.util.UsbBroadcastReceiver
-import com.eiviayw.printsupport.databinding.ActivityGprinterBinding
+
 
 /**
  * 指路：https://github.com/Yiwei099
@@ -45,6 +59,16 @@ class GPrinterActivity : AppCompatActivity() {
     private val viewBinding by lazy { ActivityGprinterBinding.inflate(layoutInflater) }
 
     private var isEsc = true
+
+    private val bleDeviceSet by lazy { mutableSetOf<BluetoothDevice>() }
+
+    private var resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode  == RESULT_OK) {
+            BlueToothHelper.getInstance().discoveryBleDevice(this)
+        }
+    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,12 +114,20 @@ class GPrinterActivity : AppCompatActivity() {
             btPrint.setOnClickListener {
                 if (rbNet.isChecked && !TextUtils.isEmpty(getPrinterKey())) {
                     startPrintByNet()
+                    return@setOnClickListener
                 }
 
                 val usbCheckID = rgUsbDevice.checkedRadioButtonId
                 if (rbUsb.isChecked && usbCheckID != -1) {
                     val usbKey = findViewById<RadioButton>(usbCheckID).text.toString()
                     startPrintByUsb(usbKey)
+                    return@setOnClickListener
+                }
+
+                if (rbBt.isChecked && usbCheckID != -1){
+                    val macAddress = findViewById<RadioButton>(usbCheckID).text.toString()
+                    val split = macAddress.split("-")
+                    startPrintByBt(split[0])
                 }
             }
 
@@ -141,6 +173,30 @@ class GPrinterActivity : AppCompatActivity() {
                 handleUsbPermission(intent)
             }
         })
+
+        bleToothBroadcastReceiver.setOnBleToothBroadcastListener(object :BlueToothBroadcastReceiver.OnBleToothReceiver{
+            override fun onFoundDevice(device: BluetoothDevice) {
+                if (!PermissionUtil.getInstance().checkPermissionForSDKVersion(
+                        Build.VERSION_CODES.S,
+                        this@GPrinterActivity,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                )){
+                    showLog("connect PERMISSION_GRANTED")
+                    return
+                }
+
+                if (!bleDeviceSet.contains(device)){
+                    bleDeviceSet.add(device)
+                    addUsbDevice(
+                        RadioButton(this@GPrinterActivity).apply {
+                            text = StringBuilder().append(device.address).append("-")
+                                .append(device.name)
+                                .toString()
+                        }
+                    )
+                }
+            }
+        })
     }
 
     private fun addUsbDevice(view: RadioButton) {
@@ -179,6 +235,24 @@ class GPrinterActivity : AppCompatActivity() {
                 split[0].toInt(),
                 split[1].toInt()
             ) else TscUsbGPrinter(this, split[0].toInt(), split[1].toInt())
+        )
+
+        val copies = getPrintCopies()
+        for (index in 0 until copies) {
+            printer?.addMission(GraphicMission(getPrintData()).apply {
+                id = "${index.plus(1)}/$copies"
+                count = copies
+                this.index = index
+            })
+        }
+    }
+
+    private fun startPrintByBt(address:String){
+        destroyCachePrinter(
+            newTag = address,
+            newPrinter = if (isEsc) EscBtGPrinter(
+                this, address
+            ) else TscBtGPrinter(this, address)
         )
 
         val copies = getPrintCopies()
@@ -261,11 +335,14 @@ class GPrinterActivity : AppCompatActivity() {
         printer = null
         printerTag = ""
         usbBroadcastReceiver.onDestroy()
+        BlueToothHelper.getInstance().stopDiscovery(this)
+        bleToothBroadcastReceiver.onDestroy()
         super.onDestroy()
     }
 
     private val usbBroadcastReceiver by lazy { UsbBroadcastReceiver(this) }
     private val usbManager by lazy { usbBroadcastReceiver.getUsbService() }
+
 
     private fun handleUsbAttached(intent: Intent) {
         getUsbDeviceFromBroadcast(intent)?.let {
@@ -330,8 +407,42 @@ class GPrinterActivity : AppCompatActivity() {
         }
     }
 
-    private fun findDeviceByBlueTooth(){
+    private val bleToothBroadcastReceiver by lazy { BlueToothBroadcastReceiver(this) }
 
+    private fun findDeviceByBlueTooth(){
+        val result = PermissionUtil.getInstance().checkPermission(this@GPrinterActivity, mutableListOf<String>().apply {
+            add(Manifest.permission.BLUETOOTH)
+            add(Manifest.permission.ACCESS_FINE_LOCATION)
+            add(Manifest.permission.ACCESS_COARSE_LOCATION)
+            PermissionUtil.getInstance().getPermissionFromSDKVersionS()
+        },REQUEST_ENABLE_BT)
+        if (!result){
+            return
+        }
+
+        if (BlueToothHelper.getInstance().needRequestEnableBle()){
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            resultLauncher.launch(enableBtIntent)
+        }
+
+        BlueToothHelper.getInstance().discoveryBleDevice(this)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 权限被用户同意，可以操作蓝牙
+                findDeviceByBlueTooth()
+            } else {
+                // 权限被用户拒绝，需要提示用户或者自动回退
+                showToast("蓝牙权限被拒绝，无法使用蓝牙功能")
+            }
+        }
     }
 
     companion object {
@@ -340,5 +451,6 @@ class GPrinterActivity : AppCompatActivity() {
         private const val USB = 1
         private const val BT = 2
         private const val REQUEST_CODE_USB_PERMISSION = 100
+        private const val REQUEST_ENABLE_BT = 200
     }
 }

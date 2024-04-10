@@ -20,7 +20,7 @@ import com.eiviayw.library.provide.BaseProvide
  * 标签数据提供者
  */
 
-class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 300)) {
+class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 320, maxHeight = 240, gravity = Constant.Companion.Gravity.CENTER, followEffectItem = true)) {
     companion object {
         @Volatile
         private var instance: LabelProvide? = null
@@ -109,9 +109,9 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
     private fun covertYDTDrawParam() = mutableListOf<BaseParam>().apply {
         add(
             TextParam(
-                text = "衣点通"
+                text = "李宁"
             ).apply {
-                size = 30f
+                size = 28f
                 typeface = Typeface.DEFAULT_BOLD
                 align = Constant.Companion.Align.ALIGN_CENTER
             }
@@ -121,7 +121,8 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "毛衣"
             ).apply {
-                size = 30f
+                size = 26f
+                typeface = Typeface.DEFAULT
             }
         )
 
@@ -129,7 +130,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "尺码：S"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
@@ -137,7 +138,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "颜色：黑色"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
@@ -145,7 +146,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "零售价：100"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
@@ -153,7 +154,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "折后价：100"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
@@ -161,15 +162,15 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "款号：001"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
         add(
             TextParam(
-                text = "品牌：衣点通"
+                text = "品牌：李宁"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
@@ -177,7 +178,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "产品标准：GB/T22-21"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
 
@@ -185,7 +186,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             TextParam(
                 text = "质量等级：优"
             ).apply {
-                size = 30f
+                size = 26f
             }
         )
     }

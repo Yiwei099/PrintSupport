@@ -1,18 +1,25 @@
 package com.eiviayw.printsupport;
 
 import android.app.Application;
-import android.content.Context;
 
-class MyApplication extends Application{
-    private static Context mContext;
 
-    public static Context getContext() {
-        return mContext;
+/**
+ * Created by Harden on 2018/7/17.
+ */
+
+public class MyApplication extends Application {
+    private static MyApplication mInstance = null;
+
+
+
+    public static MyApplication getInstance() {
+        return mInstance;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mContext = this;
+        mInstance = this;
+
     }
 }

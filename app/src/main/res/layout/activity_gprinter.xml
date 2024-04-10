@@ -6,201 +6,214 @@
     android:layout_height="match_parent"
     android:padding="10dp">
 
-    <TextView
-        android:id="@+id/tvInterfaceHint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="通讯类型："
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/rgInterface"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/rgInterface" />
-
-    <RadioGroup
-        android:id="@+id/rgInterface"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toEndOf="@id/tvInterfaceHint"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <RadioButton
-            android:id="@+id/rbNet"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Net   " />
-
-        <RadioButton
-            android:id="@+id/rbUsb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Usb   " />
-
-        <RadioButton
-            android:id="@+id/rbBt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BlueTooth" />
-
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/tvPrinterTypeHint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="打印机类型："
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/rgPrinterType"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/rgPrinterType" />
-
-    <RadioGroup
-        android:id="@+id/rgPrinterType"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toEndOf="@id/tvPrinterTypeHint"
-        app:layout_constraintTop_toBottomOf="@id/rgInterface">
-
-        <RadioButton
-            android:id="@+id/rbEsc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="收据   " />
-
-        <RadioButton
-            android:id="@+id/rbTsc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="标签   " />
-
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/tvModel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="打印策略："
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/rgMissionModel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/rgMissionModel" />
-
-    <RadioGroup
-        android:id="@+id/rgMissionModel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toEndOf="@id/tvModel"
-        app:layout_constraintTop_toBottomOf="@id/rgPrinterType">
-
-        <RadioButton
-            android:id="@+id/rbPicture"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="图片   " />
-
-        <RadioButton
-            android:id="@+id/rbText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="文本   " />
-
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/tvCopiesHint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="打印份数："
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/etTimes"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/etTimes" />
-
-    <EditText
-        android:id="@+id/etKey"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="192.168.100.12"
-        android:imeOptions="actionDone"
-        android:inputType="phone"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@id/etTimes"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etTimes"
-        tools:text="192.168.100.12" />
-
-    <EditText
-        android:id="@+id/etTimes"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="1"
-        android:imeOptions="actionDone"
-        android:inputType="number"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@id/rgMissionModel"
-        app:layout_constraintStart_toEndOf="@id/tvCopiesHint"
-        app:layout_constraintTop_toBottomOf="@id/rgMissionModel"
-        tools:text="2" />
-
-    <Button
-        android:id="@+id/btPrint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="测试打印"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/llUsb" />
-
-    <Button
-        android:id="@+id/btOpenBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开钱箱"
-        android:layout_marginStart="4dp"
-        app:layout_constraintStart_toEndOf="@id/btPrint"
-        app:layout_constraintTop_toBottomOf="@id/llUsb" />
-
-    <Button
-        android:id="@+id/btDestroy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:text="销毁缓存打印机"
-        app:layout_constraintStart_toEndOf="@id/btOpenBox"
-        app:layout_constraintTop_toTopOf="@id/btPrint" />
-
-    <LinearLayout
-        android:id="@+id/llUsb"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:orientation="vertical"
-        android:paddingBottom="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etKey">
+        android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/btUsbDevice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="获取USB设备" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <RadioGroup
-            android:id="@+id/rgUsbDevice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tvInterfaceHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="通讯类型："
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/rgInterface"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/rgInterface" />
+
+            <RadioGroup
+                android:id="@+id/rgInterface"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toEndOf="@id/tvInterfaceHint"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <RadioButton
+                    android:id="@+id/rbNet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Net   " />
+
+                <RadioButton
+                    android:id="@+id/rbUsb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Usb   " />
+
+                <RadioButton
+                    android:id="@+id/rbBt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BlueTooth" />
+
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/tvPrinterTypeHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="打印机类型："
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/rgPrinterType"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/rgPrinterType" />
+
+            <RadioGroup
+                android:id="@+id/rgPrinterType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toEndOf="@id/tvPrinterTypeHint"
+                app:layout_constraintTop_toBottomOf="@id/rgInterface">
+
+                <RadioButton
+                    android:id="@+id/rbEsc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="收据   " />
+
+                <RadioButton
+                    android:id="@+id/rbTsc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="标签   " />
+
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/tvModel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="打印策略："
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/rgMissionModel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/rgMissionModel" />
+
+            <RadioGroup
+                android:id="@+id/rgMissionModel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toEndOf="@id/tvModel"
+                app:layout_constraintTop_toBottomOf="@id/rgPrinterType">
+
+                <RadioButton
+                    android:id="@+id/rbPicture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="图片   " />
+
+                <RadioButton
+                    android:id="@+id/rbText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="文本   " />
+
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/tvCopiesHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="打印份数："
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/etTimes"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/etTimes" />
+
+            <EditText
+                android:id="@+id/etKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="192.168.100.12"
+                android:imeOptions="actionDone"
+                android:inputType="phone"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="@id/etTimes"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etTimes"
+                tools:text="192.168.100.12" />
+
+            <EditText
+                android:id="@+id/etTimes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="1"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="@id/rgMissionModel"
+                app:layout_constraintStart_toEndOf="@id/tvCopiesHint"
+                app:layout_constraintTop_toBottomOf="@id/rgMissionModel"
+                tools:text="2" />
+
+            <Button
+                android:id="@+id/btPrint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="测试打印"
+                android:layout_marginStart="4dp"
+                app:layout_constraintStart_toEndOf="@id/llUsb"
+                app:layout_constraintTop_toTopOf="@id/llUsb" />
+
+            <Button
+                android:id="@+id/btOpenBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开钱箱"
+                android:layout_marginStart="4dp"
+                app:layout_constraintStart_toEndOf="@id/btPrint"
+                app:layout_constraintTop_toTopOf="@id/btPrint"/>
+
+            <Button
+                android:id="@+id/btDestroy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="销毁缓存打印机"
+                app:layout_constraintStart_toEndOf="@id/btOpenBox"
+                app:layout_constraintTop_toTopOf="@id/btPrint" />
+
+            <LinearLayout
+                android:id="@+id/llUsb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:orientation="vertical"
+                android:paddingBottom="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etKey">
+
+                <Button
+                    android:id="@+id/btUsbDevice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="获取 USB/Ble 设备" />
+
+                <RadioGroup
+                    android:id="@+id/rgUsbDevice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
