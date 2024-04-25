@@ -54,7 +54,6 @@ dependencies {
     //协程
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
-    implementation files('libs\\AndroidPrinterSDK4.1.0.jar')
 }
 
 afterEvaluate {
@@ -65,7 +64,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.eiviayw'
                 artifactId = 'PrintSupport'
-                version = '1.0.9'
+                version = '1.1.0'
             }
         }
     }

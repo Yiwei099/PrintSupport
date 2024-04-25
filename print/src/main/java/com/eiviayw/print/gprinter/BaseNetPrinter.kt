@@ -27,7 +27,7 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
 
     override fun createPort(): PortManager = EthernetPort(getPrinterDevice())
 
-    private suspend fun missionSuccess() {
+    private fun missionSuccess() {
         failureTimes = 0
         if (isMissionEmpty()) {
             printFinish()
@@ -41,7 +41,7 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
         }
     }
 
-    private suspend fun missionFailure(result:Result){
+    private fun missionFailure(result:Result){
         failureTimes += 1
         if (isMaxRetry(failureTimes)){
             //超过重试次数，打印失败回调
@@ -61,23 +61,27 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
         cancelJob()
     }
 
-    override suspend fun startPrintJob(delayTime:Long) {
+    override fun startPrintJob(delayTime:Long) {
         getMissionQueue().peekFirst()?.let {param->
             val result = when(param){
                 is GraphicMission ->{
                     //图像模式
-                    if (commandType() == Command.ESC){
-                        sendEscDataByGraphicParam(param)
-                    }else if (commandType() == Command.TSC){
-                        sendTscDataByGraphicParam(param)
-                    }else{
-                        Result()
+                    when (printerCommand) {
+                        Command.ESC -> {
+                            sendEscDataByGraphicParam(param)
+                        }
+                        Command.TSC -> {
+                            sendTscDataByGraphicParam(param)
+                        }
+                        else -> {
+                            Result()
+                        }
                     }
                 }
 
                 is GPrinterMission -> {
                     //指令模式
-                    if (commandType() == Command.ESC){
+                    if (printerCommand == Command.ESC){
                         sendEscDataByCommandParam(param)
                     }else{
                         Result()
@@ -110,37 +114,19 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
         .setConnMethod(ConnMethod.WIFI)
         .setIp(getIPAddress())
         .setPort(getDevicePort())
-        .setCommand(Command.ESC)
-        .setCallbackListener(object : CallbackListener {
-            override fun onConnecting() {
-
-            }
-
-            override fun onCheckCommand() {
-            }
-
-            override fun onSuccess(printerDevices: PrinterDevices?) {
-            }
-
-            override fun onReceive(data: ByteArray?) {
-            }
-
-            override fun onFailure() {
-                //连接失败
-                cancelJob()
-                recordLog("connected failure")
-                getOnConnectListener()?.invoke(Result(Result.CONNECT_FAILURE))
-            }
-
-            override fun onDisconnect() {
-                //主动断开连接
-                cancelJob()
-            }
+        .setCommand(commandType()?.also {
+            printerCommand = it
         })
+        .setCallbackListener(printerCallBack)
         .build()
+
+    override fun onDiscountCallBack() {
+        super.onDiscountCallBack()
+        cancelJob()
+    }
 
     abstract fun getContext():Context
     abstract fun getIPAddress():String
-    abstract fun commandType():Command
+    abstract fun commandType():Command?
     open fun getDevicePort() = 9100
 }

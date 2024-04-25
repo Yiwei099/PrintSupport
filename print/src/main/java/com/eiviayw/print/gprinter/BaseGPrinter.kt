@@ -13,13 +13,20 @@ import com.gprinter.bean.PrinterDevices
 import com.gprinter.command.EscCommand
 import com.gprinter.command.LabelCommand
 import com.gprinter.io.PortManager
+import com.gprinter.utils.CallbackListener
+import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Timer
+import java.util.TimerTask
 import java.util.Vector
+import kotlin.concurrent.fixedRateTimer
+import kotlin.concurrent.scheduleAtFixedRate
 
 /**
  * Created with Android Studio.
@@ -35,14 +42,87 @@ import java.util.Vector
  */
 abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterface {
     private var portManager: PortManager? = null
-//    private val devices by lazy { createPrinterDevice() }
-
     private var job: Job? = null
+    protected var printerCommand: Command? = null
+    private val checkCommandTimer by lazy { Timer() }
+
+    //<editor-fold desc = "callBack，在openPort返回true之前不能在callBack内发送和读取数据">
+    protected val printerCallBack = object : CallbackListener {
+        override fun onConnecting() {
+            recordLog("onConnecting")
+            onConnectingCallBack()
+        }
+
+        override fun onCheckCommand() {
+            recordLog("onCheckCommand")
+            onCheckCommandCallBack()
+        }
+
+        override fun onSuccess(printerDevices: PrinterDevices?) {
+            recordLog("onSuccess")
+            onSuccessCallBack(printerDevices)
+        }
+
+        override fun onReceive(data: ByteArray?) {
+            recordLog("onReceive")
+            onReceiveCallBack(data)
+        }
+
+        override fun onFailure() {
+            recordLog("onFailure")
+            onFailureCallBack()
+        }
+
+        override fun onDisconnect() {
+            recordLog("onDisconnect")
+            onDiscountCallBack()
+        }
+    }
+
+    open fun onCheckCommandByCustom(){
+
+    }
+
+    open fun onConnectingCallBack(){
+
+    }
+    open fun onCheckCommandCallBack(){
+
+    }
+    open fun onSuccessCallBack(printerDevices: PrinterDevices?){
+
+    }
+    open fun onReceiveCallBack(data: ByteArray?){
+
+    }
+    open fun onFailureCallBack(){
+
+    }
+    open fun onDiscountCallBack(){
+
+    }
+
+    //</editor-fold desc = "callBack">
+
+    protected fun supplementCommand(command: Command?){
+        if (printerCommand == null){
+            printerCommand = command
+            cancelCheckCommandTimer()
+            when(command){
+                Command.ESC -> recordLog("校验到当前指令类型为 Esc")
+                Command.TSC -> recordLog("校验到当前指令类型为 Tsc")
+                Command.CPCL -> recordLog("校验到当前指令类型为 Cpcl")
+                Command.ZPL -> recordLog("校验到当前指令类型为 Zpl")
+                else -> recordLog("自动校验指令类型失败，请检查或修改校验指令")
+            }
+            startPrintJob(if (ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
+        }
+    }
 
     abstract fun createPrinterDevice(): PrinterDevices
     abstract fun createPort(): PortManager
 
-    open suspend fun startPrintJob(delayTime: Long = 0) {
+    open fun startPrintJob(delayTime: Long = 0) {
 
     }
 
@@ -65,36 +145,51 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    val connectResult = Result()
-                    try {
-                        if (portManager?.connectStatus == true) {
-                            //USB打印结束后无需关闭端口，所以这里若连接状态正常就直接发起打印
-                            startPrintJob()
-                        } else {
-                            //先close上次连接，再进行连接
-                            getPrinterPort()?.closePort()
-                            delay(1000)
-
-                            setPrinterPort(createPort())
-                            val result = getPrinterPort()?.openPort() ?: false
-                            if (result) {
-                                //连接成功
-                                getOnConnectListener()?.invoke(connectResult)
-                                startPrintJob(if (ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
+                    if (isActive){
+                        val connectResult = Result()
+                        try {
+                            if (portManager?.connectStatus == true) {
+                                //USB打印结束后无需关闭端口，所以这里若连接状态正常就直接发起打印
+                                startPrintJob()
                             } else {
-                                connectResult.code = Result.CONNECT_FAILURE
+                                //先close上次连接，再进行连接
+                                getPrinterPort()?.closePort()
+                                delay(1000)
+
+                                setPrinterPort(createPort())
+                                val result = getPrinterPort()?.openPort() ?: false
+                                if (result) {
+                                    //连接成功
+                                    getOnConnectListener()?.invoke(connectResult)
+                                    if (isCustomVerifyCommand()){
+                                        //去执行自定义的校验指令函数
+                                        checkCommandTimer.scheduleAtFixedRate(object :TimerTask(){
+                                            override fun run() {
+                                                recordLog("正在轮询指令类型")
+                                                onCheckCommandByCustom()
+                                            }
+                                        },0,2000)
+                                    }else{
+                                        //无需自定义校验指令，直接发送
+                                        startPrintJob(if (ConnMethod.USB == portManager?.printerDevices?.connMethod) 5000 else 0)
+                                    }
+                                } else {
+                                    connectResult.code = Result.CONNECT_FAILURE
+                                }
+                            }
+                        } catch (e: Exception) {
+                            connectResult.code = Result.CONNECT_EXCEPTION
+                            recordLog("to connect throw exception = ${e.message}")
+                        }finally {
+                            //回调结果
+                            if(!connectResult.isSuccess()){
+                                getOnConnectListener()?.invoke(connectResult)
+                                //连接失败重置连接任务线程
+                                cancelJob()
                             }
                         }
-                    } catch (e: Exception) {
-                        connectResult.code = Result.CONNECT_EXCEPTION
-                        recordLog("to connect throw exception = ${e.message}")
-                    }finally {
-                        //回调结果
-                        if(!connectResult.isSuccess()){
-                            getOnConnectListener()?.invoke(connectResult)
-                            //连接失败重置连接任务线程
-                            cancelJob()
-                        }
+                    }else{
+                        recordLog("Jobs state is not active")
                     }
                 }
             }
@@ -108,8 +203,13 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelCheckCommandTimer()
         cancelJob()
         getPrinterPort()?.closePort()
+    }
+
+    private fun cancelCheckCommandTimer(){
+        checkCommandTimer.cancel()
     }
 
     override fun resettingPrinter() {
@@ -251,10 +351,12 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
      * 发送指令
      * @param command 指令集
      */
-    private fun sendData(command: Vector<Byte>) =
+    protected fun sendData(command: Vector<Byte>) =
         portManager?.writeDataImmediately(command) ?: false
 
+    protected fun sendData(command: ByteArray) = portManager?.writeDataImmediately(command) ?: false
     open fun getLabelDensity() = LabelCommand.DENSITY.DNESITY0
     open fun getLabelAdjustXPosition() = 0
     open fun getLabelAdjustYPosition() = 0
+    open fun isCustomVerifyCommand():Boolean = false
 }

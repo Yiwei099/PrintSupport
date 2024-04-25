@@ -8,9 +8,10 @@
 > ⑤ 需要打印时自动建立连接，外打印完成自动销毁链接，减少通道占用率，稳定可靠  
 > ⑥ 内置任务定时器，定时轮询任务队列，保证每个任务都被执行，防止任务丢失  
 > ⑥ 只支持**Esc(收据)**，**Tsc(标签)** 两种指令；其他如针式，A4打印不在对接范围内所以不考虑对接  
-> ⑦ 由于打印机有限，需要使用的朋友可以直接拉取源码进行调试  
-> ⑧ SDK选择优先级建议：GPrinter > Epson > Bixolon > StarX  
-> ⑨ 使用 **图像** 打印时效果更佳：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
+> ⑦ (New)佳博SDK支持自动校验打印机指令
+> ⑧ 由于打印机有限，需要使用的朋友可以直接拉取源码进行调试  
+> ⑨ SDK选择优先级建议：GPrinter > Epson > Bixolon > StarX  
+> ⑩ 使用 **图像** 打印时效果更佳：[DrawingSupport](https://github.com/Yiwei099/DrawingSupport)
 
 ## 获取使用
 ### 1. Add it in your root build.gradle at the end of repositories:
@@ -27,6 +28,15 @@ dependencyResolutionManagement {
 ### 2. Add the dependency:
 ```
 implementation 'com.github.Yiwei099:PrintSupport:$releaseVersion'
+```
+
+### 3. 其他方式：
+```
+由于本库设置的版本要求为：
+compileSdkVersion = 33
+targetSdkVersion = 33
+minSdkVersion = 24
+可能会有很多项目没适配，可以把 module 下载下去修改版本进行依赖
 ```
 
 ## 详情
@@ -52,6 +62,19 @@ val printer = TscUsbGPrinter(context,vendorId,productId,serialNumber) //打印Ts
 val macAddress = "66:22:E2:4C:CB:DD"
 val printer = EscBtGPrinter(context,macAddress) //打印Esc
 val printer = TscBtGPrinter(context,macAddress) //打印Tsc
+
+//未明确指令类型
+
+//自己打印机校验指令的指令
+val command :ByteArray = ByteArray()
+val unknowBtPrinter = UnKnowBtGPrinter(context,address,command){
+    //...解析打印机返回数据，获取指令类型，并返回指令类型告知打印机
+    return when(data){
+        ...-> Command.Esc
+        ...-> Command.Tsc
+        else-> null
+    }
+}
 ```
 #### b. 打印
 ```
@@ -217,5 +240,8 @@ override fun onUsbAttached(intent: Intent) {
         }
 }
 ```
+
+### 4. 联系我
+![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/wechat_qr_code.png)
 
 ## Print support by android(不定期更新)  

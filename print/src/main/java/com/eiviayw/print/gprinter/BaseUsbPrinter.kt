@@ -3,6 +3,7 @@ package com.eiviayw.print.gprinter
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.os.Handler
 import android.text.TextUtils
 import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.Result
@@ -26,23 +27,28 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
     private var failureTimes = 0
     private val usbService by lazy { getContext().getSystemService(Context.USB_SERVICE) as UsbManager }
 
-    private suspend fun startPrint() {
+
+    private fun startPrint() {
         getMissionQueue().peekFirst()?.let { param ->
             val result = when (param) {
                 is GraphicMission -> {
                     //图像模式
-                    if (commandType() == Command.ESC){
-                        sendEscDataByGraphicParam(param)
-                    }else if (commandType() == Command.TSC){
-                        sendTscDataByGraphicParam(param)
-                    }else{
-                        Result()
+                    when (printerCommand) {
+                        Command.ESC -> {
+                            sendEscDataByGraphicParam(param)
+                        }
+                        Command.TSC -> {
+                            sendTscDataByGraphicParam(param)
+                        }
+                        else -> {
+                            Result()
+                        }
                     }
                 }
 
                 is GPrinterMission -> {
                     //指令模式
-                    if (commandType() == Command.ESC){
+                    if (printerCommand == Command.ESC){
                         sendEscDataByCommandParam(param)
                     }else{
                         Result()
@@ -65,7 +71,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         }
     }
 
-    private suspend fun missionSuccess() {
+    private fun missionSuccess() {
         failureTimes = 0
         if (!isMissionEmpty()) {
             removeHeaderMission()
@@ -79,7 +85,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         }
     }
 
-    private suspend fun missionFailure(param: BaseMission, result: Result) {
+    private fun missionFailure(param: BaseMission, result: Result) {
         failureTimes += 1
         if (isMaxRetry(failureTimes)) {
             getOnPrintListener()?.invoke(param, result)
@@ -105,9 +111,11 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         return devices
     }
 
-    override suspend fun startPrintJob(delayTime:Long) {
+    override fun startPrintJob(delayTime:Long) {
         //在打印机关闭状态下发起打印任务，连接成功直接打印时部分打印机会乱码(可能是打印机固件的Bug)，所以此时需要延迟一下，推荐时间为5s
-        if (delayTime > 0) delay(delayTime)
+        if (delayTime > 0) {
+            Thread.sleep(delayTime)
+        }
         startPrint()
     }
 
@@ -115,35 +123,18 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         .setContext(getContext())
         .setConnMethod(ConnMethod.USB)
         .setUsbDevice(getUSBPrinter())
-        .setCommand(commandType())
-        .setCallbackListener(object : CallbackListener {
-            override fun onConnecting() {
-
-            }
-
-            override fun onCheckCommand() {
-            }
-
-            override fun onSuccess(printerDevices: PrinterDevices?) {
-
-            }
-
-            override fun onReceive(data: ByteArray?) {
-            }
-
-            override fun onFailure() {
-                //连接失败
-                cancelJob()
-            }
-
-            override fun onDisconnect() {
-                //主动断开连接
-                getPrinterPort()?.closePort()
-                cancelJob()
-            }
-
+        .setCommand(commandType()?.also {
+            printerCommand = it
         })
+        .setCallbackListener(printerCallBack)
         .build()
+
+    override fun onDiscountCallBack() {
+        super.onDiscountCallBack()
+        //主动断开连接
+        getPrinterPort()?.closePort()
+        cancelJob()
+    }
 
     private fun getUSBPrinter(): UsbDevice? {
         val deviceList = usbService.deviceList
@@ -171,7 +162,7 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
         return "EscUsbPrinter(vID=${getDeviceVID()}, pID=${getDevicePID()}, serialNumber='${getDeviceSerialNumber()}')"
     }
 
-    abstract fun commandType(): Command
+    abstract fun commandType(): Command?
     abstract fun getContext(): Context
     abstract fun getDeviceVID(): Int
     abstract fun getDevicePID(): Int

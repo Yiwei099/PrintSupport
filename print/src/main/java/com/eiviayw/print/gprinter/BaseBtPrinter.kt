@@ -17,44 +17,23 @@ abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
     override fun createPrinterDevice(): PrinterDevices
     = PrinterDevices.Build()
         .setContext(getContext())
-        .setCommand(commandType())
+        .setCommand(commandType()?.also {
+            printerCommand = it
+        })
         .setConnMethod(ConnMethod.BLUETOOTH)
         .setMacAddress(getMacAddress())
-        .setCallbackListener(object :CallbackListener{
-            override fun onConnecting() {
-
-            }
-
-            override fun onCheckCommand() {
-
-            }
-
-            override fun onSuccess(printerDevices: PrinterDevices?) {
-
-            }
-
-            override fun onReceive(data: ByteArray?) {
-
-            }
-
-            override fun onFailure() {
-                //连接失败
-                cancelJob()
-                recordLog("connected failure")
-                getOnConnectListener()?.invoke(Result(Result.CONNECT_FAILURE))
-            }
-
-            override fun onDisconnect() {
-                //主动断开连接
-                cancelJob()
-            }
-
-        })
+        .setCallbackListener(printerCallBack)
         .build()
+
+    override fun onDiscountCallBack() {
+        super.onDiscountCallBack()
+        //主动断开连接
+        cancelJob()
+    }
 
     override fun createPort(): PortManager = BluetoothPort(createPrinterDevice())
 
-    private suspend fun missionSuccess() {
+    private fun missionSuccess() {
         failureTimes = 0
         if (isMissionEmpty()) {
             printFinish()
@@ -68,7 +47,7 @@ abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
         }
     }
 
-    private suspend fun missionFailure(result:Result){
+    private fun missionFailure(result:Result){
         failureTimes += 1
         if (isMaxRetry(failureTimes)){
             //超过重试次数，打印失败回调
@@ -88,23 +67,27 @@ abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
         cancelJob()
     }
 
-    override suspend fun startPrintJob(delayTime:Long) {
+    override fun startPrintJob(delayTime:Long) {
         getMissionQueue().peekFirst()?.let {param->
             val result = when(param){
                 is GraphicMission ->{
                     //图像模式
-                    if (commandType() == Command.ESC){
-                        sendEscDataByGraphicParam(param)
-                    }else if (commandType() == Command.TSC){
-                        sendTscDataByGraphicParam(param)
-                    }else{
-                        Result()
+                    when (printerCommand) {
+                        Command.ESC -> {
+                            sendEscDataByGraphicParam(param)
+                        }
+                        Command.TSC -> {
+                            sendTscDataByGraphicParam(param)
+                        }
+                        else -> {
+                            Result()
+                        }
                     }
                 }
 
                 is GPrinterMission -> {
                     //指令模式
-                    if (commandType() == Command.ESC){
+                    if (printerCommand == Command.ESC){
                         sendEscDataByCommandParam(param)
                     }else{
                         Result()
@@ -129,7 +112,7 @@ abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
         }
     }
 
-    abstract fun commandType():Command
+    abstract fun commandType():Command?
     abstract fun getMacAddress():String
     abstract fun getContext():Context
 }

@@ -1,6 +1,7 @@
 package com.eiviayw.print.gprinter
 
 import android.content.Context
+import com.gprinter.command.LabelCommand
 import com.gprinter.utils.Command
 
 /**
