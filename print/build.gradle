@@ -47,13 +47,11 @@ android {
 
 dependencies {
     api fileTree(include: ['*.jar','*.aar'], dir: 'libs')
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.6.0'
+    implementation "androidx.core:core-ktx:$rootProject.kotlin_version"
 
     //协程
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
 }
 
 afterEvaluate {
@@ -64,7 +62,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.eiviayw'
                 artifactId = 'PrintSupport'
-                version = '1.1.0'
+                version = '1.1.0-Alpha'
             }
         }
     }
