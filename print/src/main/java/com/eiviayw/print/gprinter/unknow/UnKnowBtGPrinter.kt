@@ -21,7 +21,7 @@ class UnKnowBtGPrinter(
     private val address:String,
     private val checkCommandCommand: ByteArray? = null,
     private val onReceiveCallBack:((ByteArray) -> Command?)? = null
-):BaseBtPrinter(),IUnKnowPrinter {
+):BaseBtPrinter("GPrinter：$address"),IUnKnowPrinter {
 
     override fun isCustomVerifyCommand(): Boolean = true
 

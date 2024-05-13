@@ -132,6 +132,8 @@ open class BasePrinter(
 
     }
 
+    override fun getConnectState():Boolean = false
+
     companion object {
         /**
          * 定时器间隔时间

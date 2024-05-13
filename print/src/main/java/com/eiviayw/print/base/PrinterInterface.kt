@@ -12,4 +12,6 @@ interface PrinterInterface {
 
     fun addMission(mission: BaseMission)
     fun addMission(missions:List<BaseMission>)
+
+    fun getConnectState():Boolean
 }

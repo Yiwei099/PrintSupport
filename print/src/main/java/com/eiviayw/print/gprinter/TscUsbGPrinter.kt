@@ -18,7 +18,7 @@ class TscUsbGPrinter(
     private val vID: Int,
     private val pID: Int,
     private val serialNumber: String = ""
-) :BaseUsbPrinter(){
+) :BaseUsbPrinter("GPrinterTsc：$vID-$pID-$serialNumber"){
     override fun commandType(): Command = Command.TSC
 
     override fun getContext(): Context = mContext

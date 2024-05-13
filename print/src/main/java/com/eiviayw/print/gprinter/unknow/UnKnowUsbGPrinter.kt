@@ -10,7 +10,7 @@ class UnKnowUsbGPrinter(
     private val pID: Int,
     private val checkCommandCommand: ByteArray? = null,
     private val onReceiveCallBack: ((ByteArray) -> Command?)? = null
-) : BaseUsbPrinter(),IUnKnowPrinter {
+) : BaseUsbPrinter("GPrinter：$vID-$pID"),IUnKnowPrinter {
     override fun commandType(): Command? = null
 
     override fun getContext(): Context = mContext

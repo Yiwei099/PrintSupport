@@ -23,7 +23,7 @@ import kotlinx.coroutines.delay
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  * 佳博SDK-USB
  */
-abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
+abstract class BaseUsbPrinter(private val mTag:String) : BaseGPrinter(mTag) {
     private var failureTimes = 0
     private val usbService by lazy { getContext().getSystemService(Context.USB_SERVICE) as UsbManager }
 
@@ -35,10 +35,10 @@ abstract class BaseUsbPrinter : BaseGPrinter(tag = "EscUsbPrinter") {
                     //图像模式
                     when (printerCommand) {
                         Command.ESC -> {
-                            sendEscDataByGraphicParam(param)
+                            sendEscDataByGraphicParamV1(param)
                         }
                         Command.TSC -> {
-                            sendTscDataByGraphicParam(param)
+                            sendTscDataByGraphicParamV1(param)
                         }
                         else -> {
                             Result()

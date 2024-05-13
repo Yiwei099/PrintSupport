@@ -11,7 +11,7 @@ import com.gprinter.utils.CallbackListener
 import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
 
-abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
+abstract class BaseBtPrinter(private val mTag:String):BaseGPrinter(mTag) {
     private var failureTimes = 0
 
     override fun createPrinterDevice(): PrinterDevices
@@ -74,10 +74,10 @@ abstract class BaseBtPrinter:BaseGPrinter("BlueToothPrinter") {
                     //图像模式
                     when (printerCommand) {
                         Command.ESC -> {
-                            sendEscDataByGraphicParam(param)
+                            sendEscDataByGraphicParamV1(param)
                         }
                         Command.TSC -> {
-                            sendTscDataByGraphicParam(param)
+                            sendTscDataByGraphicParamV1(param)
                         }
                         else -> {
                             Result()

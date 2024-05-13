@@ -9,7 +9,7 @@ class UnKnowNetGPrinter(
     private val ip:String,
     private val checkCommandCommand: ByteArray? = null,
     private val onReceiveCallBack:((ByteArray) -> Command?)? = null
-):BaseNetPrinter(),IUnKnowPrinter {
+):BaseNetPrinter("GPrinter：$ip"),IUnKnowPrinter {
     override fun getContext(): Context = mContext
 
     override fun getIPAddress(): String = ip

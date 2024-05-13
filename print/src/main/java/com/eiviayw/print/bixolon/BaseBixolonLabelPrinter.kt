@@ -15,6 +15,7 @@ import com.eiviayw.print.util.BitmapUtils
 import com.eiviayw.print.util.BixolonUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -124,7 +125,9 @@ abstract class BaseBixolonLabelPrinter(
         if (findJob == null){
             findJob = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    printer.findNetworkPrinters(DEFAULT_FIND_OUT_TIME)
+                    if (isActive){
+                        printer.findNetworkPrinters(DEFAULT_FIND_OUT_TIME)
+                    }
                 }
             }
         }
@@ -219,7 +222,7 @@ abstract class BaseBixolonLabelPrinter(
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    if (!isConnected()) {
+                    if (isActive && !isConnected()) {
                         connect()
                     }
                 }
@@ -335,7 +338,9 @@ abstract class BaseBixolonLabelPrinter(
         if (printJob == null) {
             printJob = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    startPrint()
+                    if (isActive){
+                        startPrint()
+                    }
                 }
             }
         }

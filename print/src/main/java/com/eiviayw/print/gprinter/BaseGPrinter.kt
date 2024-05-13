@@ -133,6 +133,8 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     protected fun getPrinterPort() = portManager
     open fun getPrinterDevice() = createPrinterDevice()
 
+    override fun getConnectState(): Boolean = portManager?.connectStatus ?: false
+
     override fun handlerTimerDo() {
         super.handlerTimerDo()
         startJob()
@@ -217,7 +219,31 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         cancelJob()
     }
 
+    /**
+     * 初始化打印机机 / 清除打印缓冲区数据
+     */
+    private fun initPrinter() {
+        sendData(EscCommand().apply {
+            addInitializePrinter()
+        }.command)
+    }
+
     //<editor-fold desc= "Esc">
+    protected fun sendEscDataByGraphicParamV1(param: GraphicMission): Result {
+        return if (param.countByOne){
+            var result = Result()
+            for (i in 0 until param.count) {
+                val tempResult = sendEscDataByGraphicParam(param)
+                if (result.isSuccess()){
+                    //一次成功代表所有成功(暂时无法批量返回结果)
+                    result = tempResult
+                }
+            }
+            result
+        }else{
+            sendEscDataByGraphicParam(param)
+        }
+    }
 
     /**
      * 图像形式打印
@@ -225,7 +251,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
      * @param clearCache 发送数据前时候先清除打印机缓冲区数据
      * @return 打印结果 true-打印成功；false-打印异常
      */
-    protected fun sendEscDataByGraphicParam(
+    private fun sendEscDataByGraphicParam(
         param: GraphicMission,
         clearCache: Boolean = true
     ): Result {
@@ -272,60 +298,6 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         return result
     }
 
-    /**
-     * 图像数据转换成SDK指令
-     * @param bitmap 图像
-     * @return SDK ESC指令集
-     */
-    private fun convertBitmapToCommand(bitmap: Bitmap): EscCommand =
-        EscCommand().apply { drawImage(bitmap) }
-
-    /**
-     * 初始化打印机机 / 清除打印缓冲区数据
-     */
-    private fun initPrinter() {
-        sendData(EscCommand().apply {
-            addInitializePrinter()
-        }.command)
-    }
-
-    //</editor-fold desc= "Esc">
-
-    //<editor-fold desc="Tsc">
-    protected fun sendTscDataByGraphicParam(param: GraphicMission): Result {
-        val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
-        val result = Result()
-        val command = LabelCommand().apply {
-//            addSize(40,60)
-            addDirection(
-                LabelCommand.DIRECTION.BACKWARD,
-                LabelCommand.MIRROR.NORMAL
-            )
-            addDensity(getLabelDensity())
-            addCls()
-            addBitmap(
-                getLabelAdjustXPosition(),
-                getLabelAdjustYPosition(),
-                dataBitmap.width,
-                dataBitmap
-            )
-            addPrint(1, 1)
-        }.command
-        try {
-            val sendResult = sendData(command)
-            if (!sendResult) {
-                throw Exception("Port Exception")
-            }
-        } catch (e: Exception) {
-            recordLog("sendTscDataByGraphicParam trow Exception = ${e.message}")
-            result.code = Result.PRINT_EXCEPTION
-            result.msg = e.message ?: ""
-        }
-
-        return result
-    }
-    //</editor-fold desc="Tsc">
-
     protected fun sendEscDataByCommandParam(
         param: GPrinterMission,
         clearCache: Boolean = true
@@ -346,6 +318,73 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
         }
         return result
     }
+
+    /**
+     * 图像数据转换成SDK指令
+     * @param bitmap 图像
+     * @return SDK ESC指令集
+     */
+    private fun convertBitmapToCommand(bitmap: Bitmap): EscCommand =
+        EscCommand().apply { drawImage(bitmap) }
+    //</editor-fold desc= "Esc">
+
+    //<editor-fold desc="Tsc">
+    protected fun sendTscDataByGraphicParamV1(param: GraphicMission): Result {
+        return if (param.countByOne){
+            var result = Result()
+            for (i in 0 until param.count) {
+                val tempResult = sendTscDataByGraphicParam(param)
+                if (result.isSuccess()){
+                    //一次成功代表所有成功(暂时无法批量返回结果)
+                    result = tempResult
+                }
+            }
+            result
+        }else{
+            sendTscDataByGraphicParam(param)
+        }
+    }
+
+    private fun sendTscDataByGraphicParam(param: GraphicMission): Result {
+        if (param.bitmapWidth == 0 || param.bitmapHeight == 0){
+            return Result(Result.BITMAP_SIZE_ERROR)
+        }
+        val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
+        val result = Result()
+        val command = LabelCommand().apply {
+            addSize(param.bitmapWidth,param.bitmapHeight)
+            addDirection(
+                LabelCommand.DIRECTION.BACKWARD,
+                LabelCommand.MIRROR.NORMAL
+            )
+            addDensity(getLabelDensity())
+            addCls()
+            addBitmap(
+                getLabelAdjustXPosition(),
+                getLabelAdjustYPosition(),
+                dataBitmap.width,
+                dataBitmap
+            )
+            if (param.countByOne){
+                addPrint(1, 1)
+            }else{
+                addPrint(param.count)
+            }
+        }.command
+        try {
+            val sendResult = sendData(command)
+            if (!sendResult) {
+                throw Exception("Port Exception")
+            }
+        } catch (e: Exception) {
+            recordLog("sendTscDataByGraphicParam trow Exception = ${e.message}")
+            result.code = Result.PRINT_EXCEPTION
+            result.msg = e.message ?: ""
+        }
+
+        return result
+    }
+    //</editor-fold desc="Tsc">
 
     /**
      * 发送指令

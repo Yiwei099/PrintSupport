@@ -20,7 +20,7 @@ class TscNetGPrinter(
     private val density: LabelCommand.DENSITY = LabelCommand.DENSITY.DNESITY0,
     private val adjustX:Int = 0,
     private val adjustY:Int = 0
-) :BaseNetPrinter(){
+) :BaseNetPrinter("GPrinterTsc：${ipAddress + port}"){
     override fun getContext(): Context = mContext
 
     override fun getIPAddress(): String = ipAddress

@@ -21,7 +21,7 @@ import com.gprinter.utils.ConnMethod
  * @Version Copyright (c) 2023, Android Engineer YYW All Rights Reserved.
  * 佳博SDK-Net
  */
-abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
+abstract class BaseNetPrinter(private val mTag:String): BaseGPrinter(tag = mTag) {
 
     private var failureTimes = 0
 
@@ -68,10 +68,10 @@ abstract class BaseNetPrinter: BaseGPrinter(tag = "EscNetPrinter") {
                     //图像模式
                     when (printerCommand) {
                         Command.ESC -> {
-                            sendEscDataByGraphicParam(param)
+                            sendEscDataByGraphicParamV1(param)
                         }
                         Command.TSC -> {
-                            sendTscDataByGraphicParam(param)
+                            sendTscDataByGraphicParamV1(param)
                         }
                         else -> {
                             Result()

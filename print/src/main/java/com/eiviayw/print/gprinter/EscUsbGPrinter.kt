@@ -17,7 +17,7 @@ class EscUsbGPrinter(
     private val vID: Int,
     private val pID: Int,
     private val serialNumber: String = ""
-) : BaseUsbPrinter() {
+) : BaseUsbPrinter("GPrinterEsc：$vID-$pID-$serialNumber") {
 
     override fun commandType(): Command = Command.ESC
     override fun getContext(): Context = mContext

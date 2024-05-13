@@ -7,7 +7,7 @@ import com.gprinter.utils.Command
 class TscBtGPrinter(
     private val mContext: Context,
     private val macAddress:String
-):BaseBtPrinter() {
+):BaseBtPrinter("GPrinterTsc：$macAddress") {
     override fun commandType(): Command = Command.TSC
 
     override fun getMacAddress(): String = macAddress

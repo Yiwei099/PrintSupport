@@ -44,5 +44,6 @@ data class Result(
         const val JOB_FULL_EXCEPTION = -21 // The number of print jobs sent to the printer has exceeded the allowable limit.
         const val DATA_OVERFLOW_EXCEPTION = -22 // The size of the print job data exceeds the capacity of the printer.
         const val PARER_REMOVAL_EXCEPTION = -23 // Print command sent while waiting for paper removal.
+        const val BITMAP_SIZE_ERROR = -24//图像任务尺寸异常
     }
 }

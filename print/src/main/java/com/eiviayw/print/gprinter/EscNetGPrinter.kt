@@ -16,7 +16,7 @@ class EscNetGPrinter(
     private val mContext: Context,
     private val ipAddress: String,
     private val port: Int = 9100
-) : BaseNetPrinter() {
+) : BaseNetPrinter("GPrinterEsc：${ipAddress + port}") {
     override fun getContext(): Context = mContext
 
     override fun getIPAddress(): String = ipAddress
