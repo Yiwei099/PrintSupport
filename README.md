@@ -48,6 +48,14 @@ minSdkVersion = 24
 
 #### a. 创建
 ```
+//从 1.2.0 或1.2.0-Alpha版本开始，如果您的标签内容高度非自适应则需要指定标签高度
+GraphicMission(
+    //...
+    bitmapHeight:Int = 30
+    bitmapWidth:Int = 40
+    selfAdaptionHeight:Boolean = false
+)
+
 //局域网通讯
 val key = "192.168.100.150"
 val printer = EscNetGPrinter(context, netKey) //打印Esc
