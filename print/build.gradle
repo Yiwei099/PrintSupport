@@ -62,7 +62,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.eiviayw'
                 artifactId = 'PrintSupport'
-                version = '1.2.0-Alpha'
+                version = '1.2.0'
             }
         }
     }
