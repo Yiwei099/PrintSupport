@@ -8,6 +8,9 @@ buildscript {
         targetSdkVersion = 29
         minSdkVersion = 21
 
+        versionCode = 1000
+        versionName = "alpha-release"
+
         gradle_version = "4.2.2"
 
 //        kotlin_version = "1.8.0"

@@ -16,6 +16,13 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
+        android:id="@+id/btMht"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="美恒通 SDK"
+        android:visibility="gone"/>
+
+    <Button
         android:id="@+id/btEpson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

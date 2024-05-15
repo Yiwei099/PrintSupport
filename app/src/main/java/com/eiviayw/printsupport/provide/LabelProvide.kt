@@ -20,7 +20,15 @@ import com.eiviayw.library.provide.BaseProvide
  * 标签数据提供者
  */
 
-class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 320, maxHeight = 240, gravity = Constant.Companion.Gravity.CENTER, followEffectItem = true)) {
+class LabelProvide private constructor() : BaseProvide(
+    BitmapOption(
+        maxWidth = 240,
+        maxHeight = 160,
+        topIndentation = 0f,
+        startIndentation = 0f,
+        gravity = Constant.Companion.Gravity.CENTER
+    )
+) {
     companion object {
         @Volatile
         private var instance: LabelProvide? = null
@@ -42,7 +50,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
     }
 
     private fun start(): ByteArray {
-        val params = covertYDTDrawParam()
+        val params = covertDrawParam()
         return startDraw(params)
     }
 
@@ -106,7 +114,7 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
         )
     }
 
-    private fun covertYDTDrawParam() = mutableListOf<BaseParam>().apply {
+    private fun covertDrawParam() = mutableListOf<BaseParam>().apply {
         add(
             TextParam(
                 text = "李宁"
@@ -190,5 +198,4 @@ class LabelProvide private constructor() : BaseProvide(BitmapOption(maxWidth = 3
             }
         )
     }
-
 }

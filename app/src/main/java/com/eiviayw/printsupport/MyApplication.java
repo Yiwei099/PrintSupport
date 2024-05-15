@@ -2,6 +2,8 @@ package com.eiviayw.printsupport;
 
 import android.app.Application;
 
+import com.eiviayw.print.util.BixolonUtils;
+
 
 /**
  * Created by Harden on 2018/7/17.
@@ -20,6 +22,6 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-
+        BixolonUtils.getInstance().initLibrary();
     }
 }

@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.startActivityForResult
+import com.eiviayw.printsupport.BuildConfig
 import com.eiviayw.printsupport.MyApplication
 import com.eiviayw.printsupport.PermissionUtil
 
@@ -39,13 +40,13 @@ class BlueToothHelper private constructor() {
     fun needRequestEnableBle(): Boolean = supportBlueTooth() && !enableBle()
 
     fun discoveryBleDevice(activity: Activity): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return false
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(
+//                activity,
+//                Manifest.permission.BLUETOOTH_SCAN
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            return false
+//        }
 
         if (!supportBlueTooth()) {
             return false
@@ -60,13 +61,14 @@ class BlueToothHelper private constructor() {
     }
 
     fun stopDiscovery(activity: Activity){
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+//            && ActivityCompat.checkSelfPermission(
+//                activity,
+//                Manifest.permission.BLUETOOTH_SCAN
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            return
+//        }
         bleAdapter?.cancelDiscovery()
     }
 }

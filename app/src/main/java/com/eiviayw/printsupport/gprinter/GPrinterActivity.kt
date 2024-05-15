@@ -1,6 +1,7 @@
 package com.eiviayw.printsupport.gprinter
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -15,11 +16,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.RadioButton
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.GPrinterMission
@@ -30,7 +27,10 @@ import com.eiviayw.print.gprinter.EscUsbGPrinter
 import com.eiviayw.print.gprinter.TscBtGPrinter
 import com.eiviayw.print.gprinter.TscNetGPrinter
 import com.eiviayw.print.gprinter.TscUsbGPrinter
+import com.eiviayw.print.gprinter.unknow.UnKnowBtGPrinter
+import com.eiviayw.print.gprinter.unknow.UnKnowUsbGPrinter
 import com.eiviayw.printsupport.BuildConfig
+import com.eiviayw.printsupport.MyApplication
 import com.eiviayw.printsupport.PermissionUtil
 import com.eiviayw.printsupport.R
 import com.eiviayw.printsupport.databinding.ActivityGprinterBinding
@@ -39,6 +39,7 @@ import com.eiviayw.printsupport.provide.PrintDataProvide
 import com.eiviayw.printsupport.util.BlueToothBroadcastReceiver
 import com.eiviayw.printsupport.util.BlueToothHelper
 import com.eiviayw.printsupport.util.UsbBroadcastReceiver
+import com.gprinter.utils.Command
 
 
 /**
@@ -62,11 +63,11 @@ class GPrinterActivity : AppCompatActivity() {
 
     private val bleDeviceSet by lazy { mutableSetOf<BluetoothDevice>() }
 
-    private var resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode  == RESULT_OK) {
-            BlueToothHelper.getInstance().discoveryBleDevice(this)
-        }
-    }
+//    private var resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//        if (result.resultCode  == RESULT_OK) {
+//            BlueToothHelper.getInstance().discoveryBleDevice(this)
+//        }
+//    }
 
 
 
@@ -94,10 +95,10 @@ class GPrinterActivity : AppCompatActivity() {
                 interfaceType = if (checkedId == R.id.rbNet) {
                     initIP(TEST_IP)
                     NET
-                } else if (checkedId == R.id.rbUsb){
+                } else if (checkedId == R.id.rbUsb) {
                     initIP("")
                     USB
-                }else{
+                } else {
                     initIP("")
                     BT
                 }
@@ -124,7 +125,7 @@ class GPrinterActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                if (rbBt.isChecked && usbCheckID != -1){
+                if (rbBt.isChecked && usbCheckID != -1) {
                     val macAddress = findViewById<RadioButton>(usbCheckID).text.toString()
                     val split = macAddress.split("-")
                     startPrintByBt(split[0])
@@ -139,10 +140,10 @@ class GPrinterActivity : AppCompatActivity() {
             }
 
             btUsbDevice.setOnClickListener {
-                when(interfaceType){
+                when (interfaceType) {
                     USB -> findDeviceByUSB()
                     BT -> findDeviceByBlueTooth()
-                    else ->{ }
+                    else -> {}
                 }
             }
 
@@ -156,6 +157,33 @@ class GPrinterActivity : AppCompatActivity() {
                     val usbKey = findViewById<RadioButton>(usbCheckID).text.toString()
                     startOpenBoxByUsb(usbKey)
                 }
+            }
+
+            btCheck.setOnClickListener {
+                BlueToothHelper.getInstance().stopDiscovery(this@GPrinterActivity)
+                val text = findViewById<RadioButton>(rgUsbDevice.checkedRadioButtonId).text.toString()
+                val myUnKnowBtPrinter =
+                    UnKnowBtGPrinter(
+                        MyApplication.getInstance(),
+                        text.split("-")[0],
+                        getCommandCheck()
+                    ) { bytes ->
+                        val hexString = StringBuilder()
+                        for (b in bytes) {
+                            val hex = String.format("%02X", b)
+                            hexString.append(hex)
+                        }
+                        return@UnKnowBtGPrinter if (hexString.toString().contains("10F0C10101")) {
+                            //当前打印机指令为 Tsc
+                            Command.TSC
+                        } else if (hexString.toString().contains("10F0C10000")) {
+                            //当前打印机指令为 Esc
+                            Command.ESC
+                        } else {
+                            null
+                        }
+                    }
+                myUnKnowBtPrinter.addMission(GraphicMission(getPrintData()))
             }
         }
 
@@ -174,18 +202,20 @@ class GPrinterActivity : AppCompatActivity() {
             }
         })
 
-        bleToothBroadcastReceiver.setOnBleToothBroadcastListener(object :BlueToothBroadcastReceiver.OnBleToothReceiver{
+        bleToothBroadcastReceiver.setOnBleToothBroadcastListener(object :
+            BlueToothBroadcastReceiver.OnBleToothReceiver {
             override fun onFoundDevice(device: BluetoothDevice) {
-                if (!PermissionUtil.getInstance().checkPermissionForSDKVersion(
-                        Build.VERSION_CODES.S,
-                        this@GPrinterActivity,
-                        Manifest.permission.BLUETOOTH_CONNECT
-                )){
-                    showLog("connect PERMISSION_GRANTED")
-                    return
-                }
+//                if (!PermissionUtil.getInstance().checkPermissionForSDKVersion(
+//                        Build.VERSION_CODES.S,
+//                        this@GPrinterActivity,
+//                        Manifest.permission.BLUETOOTH_CONNECT
+//                    )
+//                ) {
+//                    showLog("connect PERMISSION_GRANTED")
+//                    return
+//                }
 
-                if (!bleDeviceSet.contains(device)){
+                if (!bleDeviceSet.contains(device)) {
                     bleDeviceSet.add(device)
                     addUsbDevice(
                         RadioButton(this@GPrinterActivity).apply {
@@ -217,9 +247,9 @@ class GPrinterActivity : AppCompatActivity() {
         val missionList = mutableListOf<BaseMission>()
 
         for (index in 0 until copies) {
-            if (viewBinding.rbText.isChecked){
+            if (viewBinding.rbText.isChecked) {
                 missionList.add(GPrinterMission(PrintDataProvide.getInstance().getCommand()))
-            }else{
+            } else {
                 missionList.add(GraphicMission(getPrintData()))
             }
         }
@@ -247,7 +277,8 @@ class GPrinterActivity : AppCompatActivity() {
         }
     }
 
-    private fun startPrintByBt(address:String){
+    private fun startPrintByBt(address: String) {
+        BlueToothHelper.getInstance().stopDiscovery(this)
         destroyCachePrinter(
             newTag = address,
             newPrinter = if (isEsc) EscBtGPrinter(
@@ -256,16 +287,27 @@ class GPrinterActivity : AppCompatActivity() {
         )
 
         val copies = getPrintCopies()
-        for (index in 0 until copies) {
             printer?.addMission(GraphicMission(getPrintData()).apply {
-                id = "${index.plus(1)}/$copies"
                 count = copies
-                this.index = index
+                countByOne = false
+                bitmapHeight = 30
+                bitmapWidth = 40
             })
-        }
     }
 
-    private fun startOpenBoxByNet(){
+    private fun getCommandCheck(): ByteArray {
+        val hexString = "10F0C1"
+        val command = ByteArray(hexString.length / 2)
+        for (i in command.indices) {
+            val index = i * 2
+            val intValue = hexString.substring(index, index + 2).toInt(16)
+            command[i] = intValue.toByte()
+        }
+        return command
+    }
+
+
+    private fun startOpenBoxByNet() {
         destroyCachePrinter(
             newPrinter = EscNetGPrinter(
                 this,
@@ -276,11 +318,11 @@ class GPrinterActivity : AppCompatActivity() {
         printer?.addMission(GPrinterMission(GPrinterMission.getOpenBoxCommand()))
     }
 
-    private fun startOpenBoxByUsb(usbKey: String){
+    private fun startOpenBoxByUsb(usbKey: String) {
         val split = usbKey.split("-")
         destroyCachePrinter(
             newTag = usbKey,
-            newPrinter =  EscUsbGPrinter(
+            newPrinter = EscUsbGPrinter(
                 this,
                 split[0].toInt(),
                 split[1].toInt()
@@ -290,9 +332,9 @@ class GPrinterActivity : AppCompatActivity() {
         printer?.addMission(GPrinterMission(GPrinterMission.getOpenBoxCommand()))
     }
 
-    private fun getPrintData() = if (isEsc){
+    private fun getPrintData() = if (isEsc) {
         bitmapData
-    }else{
+    } else {
         tscBitmapData
     }
 
@@ -307,7 +349,7 @@ class GPrinterActivity : AppCompatActivity() {
             showToast("旧的打印机已被销毁")
             if (createNew) {
                 printer = newPrinter.apply {
-                    setOnPrintListener{baseParam, result ->
+                    setOnPrintListener { baseParam, result ->
                         baseParam?.let {
                             showLog("${it.id} - ${result.isSuccess()}")
                         }
@@ -376,13 +418,13 @@ class GPrinterActivity : AppCompatActivity() {
     }
 
     private fun getUsbDeviceFromBroadcast(intent: Intent): UsbDevice? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
-        } else {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
+//        } else {
             intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-        }
+//        }
 
-    private fun findDeviceByUSB(){
+    private fun findDeviceByUSB() {
         val deviceList = usbManager.deviceList
         val iterator = deviceList.iterator()
         viewBinding.rgUsbDevice.removeAllViews()
@@ -409,23 +451,34 @@ class GPrinterActivity : AppCompatActivity() {
 
     private val bleToothBroadcastReceiver by lazy { BlueToothBroadcastReceiver(this) }
 
-    private fun findDeviceByBlueTooth(){
-        val result = PermissionUtil.getInstance().checkPermission(this@GPrinterActivity, mutableListOf<String>().apply {
-            add(Manifest.permission.BLUETOOTH)
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            PermissionUtil.getInstance().getPermissionFromSDKVersionS()
-        },REQUEST_ENABLE_BT)
-        if (!result){
+    private fun findDeviceByBlueTooth() {
+        val result = PermissionUtil.getInstance()
+            .checkPermission(this@GPrinterActivity, mutableListOf<String>().apply {
+                add(Manifest.permission.BLUETOOTH)
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
+                add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                PermissionUtil.getInstance().getPermissionFromSDKVersionS()
+            }, REQUEST_ENABLE_BT)
+        if (!result) {
             return
         }
 
-        if (BlueToothHelper.getInstance().needRequestEnableBle()){
+        if (BlueToothHelper.getInstance().needRequestEnableBle()) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            resultLauncher.launch(enableBtIntent)
+            startActivityForResult(enableBtIntent,0x0A1)
+//            resultLauncher.launch(enableBtIntent)
         }
 
         BlueToothHelper.getInstance().discoveryBleDevice(this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK){
+            if (requestCode == 0x0A1){
+                BlueToothHelper.getInstance().discoveryBleDevice(this)
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -443,6 +496,11 @@ class GPrinterActivity : AppCompatActivity() {
                 showToast("蓝牙权限被拒绝，无法使用蓝牙功能")
             }
         }
+    }
+
+    private fun createEmptyPrinter(vID: Int, pID: Int) {
+        val printer = UnKnowUsbGPrinter(MyApplication.getInstance(), vID, pID)
+        printer.addMission(GraphicMission(bitmapData))
     }
 
     companion object {

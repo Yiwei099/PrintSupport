@@ -56,12 +56,12 @@ class PermissionUtil private constructor() {
     }
 
     fun getPermissionFromSDKVersionS():List<String>{
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            return mutableListOf<String>().apply {
-                add(Manifest.permission.BLUETOOTH_SCAN)
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-            }
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+//            return mutableListOf<String>().apply {
+//                add(Manifest.permission.BLUETOOTH_SCAN)
+//                add(Manifest.permission.BLUETOOTH_CONNECT)
+//            }
+//        }
         return emptyList()
     }
 

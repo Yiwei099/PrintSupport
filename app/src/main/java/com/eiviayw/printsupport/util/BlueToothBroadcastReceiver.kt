@@ -20,11 +20,12 @@ class BlueToothBroadcastReceiver (private val context: Context): BroadcastReceiv
         intent?.run {
             when(action){
                 BluetoothDevice.ACTION_FOUND->{
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        getParcelableExtra(BluetoothDevice.EXTRA_DEVICE,BluetoothDevice::class.java)
-                    } else {
-                        getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    }?.let {
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                        getParcelableExtra(BluetoothDevice.EXTRA_DEVICE,BluetoothDevice::class.java)
+//                    } else {
+                        getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+//                    }
+                    ?.let {
                         listener?.onFoundDevice(it)
                     }
                 }
