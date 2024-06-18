@@ -122,7 +122,7 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     abstract fun createPrinterDevice(): PrinterDevices
     abstract fun createPort(): PortManager
 
-    open fun startPrintJob(delayTime: Long = 0) {
+    open fun startPrintJob(delayTime: Long = 0)  {
 
     }
 
