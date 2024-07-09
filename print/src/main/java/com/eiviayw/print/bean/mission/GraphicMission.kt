@@ -19,7 +19,7 @@ class GraphicMission(
     val graphicQuality: Int = 100,//图像质量：0～100
     val cutBitmap:Boolean = true,//是否需要切割图像(分段发送)
     var bitmapWidth:Int = 0,//图像宽度
-    val selfAdaptionHeight:Boolean = true
+    val selfAdaptionHeight:Boolean = true,//是否自适应高度：true=自适应；false=固定高度
 ) : BaseMission() {
 
     /**

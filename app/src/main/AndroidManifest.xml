@@ -49,6 +49,9 @@
             android:name=".gprinter.GPrinterActivity"
             android:exported="false" />
         <activity
+            android:name=".gprinter.NativeUsbActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

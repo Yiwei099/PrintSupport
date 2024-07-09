@@ -48,13 +48,6 @@ minSdkVersion = 24
 
 #### a. 创建
 ```
-//从 1.2.0 或1.2.0-Alpha版本开始，如果您的标签内容高度非自适应则需要指定标签高度
-GraphicMission(
-    //...
-    bitmapHeight:Int = 30
-    bitmapWidth:Int = 40
-    selfAdaptionHeight:Boolean = false
-)
 
 //局域网通讯
 val key = "192.168.100.150"
@@ -87,7 +80,13 @@ val unknowBtPrinter = UnKnowBtGPrinter(context,address,command){
 #### b. 打印
 ```
 //以图片的形式打印
-val mission = GraphicMission(bitmapArray)
+//从 1.2.0 或1.2.0-Alpha版本开始，如果您的标签内容高度非自适应则需要指定标签高度
+val mission = GraphicMission(
+                bitmapArray,
+                bitmapHeight:Int = 30,//标签高度
+                bitmapWidth:Int = 40,//标签宽度
+                selfAdaptionHeight:Boolean = false,//固定高度
+              )
 
 //以SDK指令形式打印
 val mission = CommandMission(escCommand)
@@ -120,7 +119,13 @@ val printer = EpsonPrinter(context,interface,target)
 #### b. 打印
 ```
 //以图片的形式打印
-val mission = GraphicMission(bitmapArray)
+//从 1.2.0 或1.2.0-Alpha版本开始，如果您的标签内容高度非自适应则需要指定标签高度
+val mission = GraphicMission(
+                bitmapArray,
+                bitmapHeight:Int = 30,//标签高度
+                bitmapWidth:Int = 40,//标签宽度
+                selfAdaptionHeight:Boolean = false,//固定高度
+              )
 
 //以SDK指令形式打印
 val mission = EpsonMission(
@@ -170,7 +175,13 @@ val printer = BixolonNetLabelPrinter(mContext)
 #### c. 打印
 ```
 //以图片的形式打印
-val mission = GraphicMission(bitmapArray)
+//从 1.2.0 或1.2.0-Alpha版本开始，如果您的标签内容高度非自适应则需要指定标签高度
+val mission = GraphicMission(
+                bitmapArray,
+                bitmapHeight:Int = 30,//标签高度
+                bitmapWidth:Int = 40,//标签宽度
+                selfAdaptionHeight:Boolean = false,//固定高度
+              )
 printer.addMission(mission)
 ```
 #### d. 销毁(必要时)
@@ -195,7 +206,47 @@ val printer = BixolonNetLabelPrinter(mContext,ip).apply{
 printer.startFindPrinter()
 ```
 
-### 4.打开钱箱
+### 4.原生USB打印
+> 详细测试用例请看 **NativeUsbActivity.kt**
+> 此方式对比 GPrinter(佳博SDK) 的 USB打印只是连接与发送过程的差异；有的设备USB通讯异常，所以开发出了 NativeUsb，它的连接和发送不依赖任何SDK，但是指令还是使用佳博的指令
+> 
+#### a. 创建
+```
+//实例化打印机
+val printer = NativeUsbPrinter(
+                mContext: Context, //上下文对象
+                usbDevice: UsbDevice, //USB设备实例
+                commandType:Command, //指令类型：ESC/TSC
+                bufferSize: Int = 16384, //缓冲区大小
+                timeOut: Int = 3000, //超时时间
+                density: DENSITY = LabelCommand.DENSITY.DNESITY1, //打印浓度
+                adjustX: Int = 0, //左侧偏移
+                adjustY: Int = 0, //顶部偏移
+              )
+```
+#### b. 打印
+```
+//以图片的形式打印
+//从 1.2.0 或1.2.0-Alpha版本开始，如果您的标签内容高度非自适应则需要指定标签高度
+val mission = GraphicMission(
+                bitmapArray,
+                bitmapHeight:Int = 30,//标签高度
+                bitmapWidth:Int = 40,//标签宽度
+                selfAdaptionHeight:Boolean = false,//固定高度
+              )
+
+//以SDK指令形式打印
+val mission = CommandMission(escCommand)
+
+//调用addMission即可
+printer.addMission(mission)
+```
+#### c. 销毁(必要时)
+```
+printer.onDestroy()
+```
+
+### 5.打开钱箱
 > 开钱箱的Byte指令从佳博SDK中获得，不一定适用所有打印机，若该指令无效请使用自己已测试通过的指令数组再使用本库发送  
 ```
 //佳博打印机开钱箱
@@ -248,6 +299,37 @@ override fun onUsbAttached(intent: Intent) {
         }
 }
 ```
+
+### 4. 已定义的错误码汇总(逻辑自定义和SDK定义)
+|--|--|
+|0|通用成功
+|-1|通用异常(未知原因)
+|-2|连接失败
+|-3|连接异常
+|-4|打印失败
+|-5|打印异常
+|-6|断开连接异常
+|-7|Automatic recovery error occurred
+|-8|Cover open error occurred(盖子未关闭)
+|-9|Auto cutter error occurred(切纸异常)
+|-10|Mechanical error occurred(打印机机械错误)
+|-11|No paper is left in the roll paper end detector(未检测到打印纸)
+|-12|Unrecoverable error occurred
+|-13|Error exists in the requested document syntax
+|-14|Printer specified by the device ID does not exist.(找不到打印机)
+|-15|Error occurred with the printing system
+|-16|Error was detected with the communication port
+|-17|Print timeout occurred.(超时)
+|-18|Specified print job ID does not exist
+|-19|Print queue is full.
+|-20|Battery has run out.(电量低)
+|-21|The number of print jobs sent to the printer has exceeded the allowable limit
+|-22|The size of the print job data exceeds the capacity of the printer
+|-23|rint command sent while waiting for paper removal
+|-24|图像任务尺寸异常
+|-25|没有权限
+|-26|指令异常
+
 
 ### 4. 联系我
 ![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/wechat_qr_code.png)

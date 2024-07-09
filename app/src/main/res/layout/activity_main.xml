@@ -26,4 +26,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Bixolon Label SDK"/>
+    <Button
+        android:id="@+id/btNative"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NativeUsb"/>
 </LinearLayout>

@@ -34,7 +34,7 @@ class NativeUsbPrinter(
     private val commandType:Command,
     private val bufferSize: Int = 16384,
     private val timeOut: Int = 3000,
-    private val density: DENSITY,
+    private val density: DENSITY = LabelCommand.DENSITY.DNESITY1,
     private val adjustX: Int = 0,
     private val adjustY: Int = 0,
 ) : BasePrinter() {
@@ -57,7 +57,7 @@ class NativeUsbPrinter(
         if (job == null) {
             job = getMyScope().launch {
                 withContext(Dispatchers.IO) {
-                    if (isActive && connection != null) {
+                    if (isActive) {
                         delay(1000)
                         //打开端口
                         val result = connection(usbDevice)
@@ -161,6 +161,14 @@ class NativeUsbPrinter(
     private fun cancelMainJob() {
         job?.cancel()
         job = null
+    }
+
+    override fun onDestroy() {
+        if (connection != null) {
+            connection?.close()
+            connection = null
+        }
+        super.onDestroy()
     }
 
     private fun cancelJob() {

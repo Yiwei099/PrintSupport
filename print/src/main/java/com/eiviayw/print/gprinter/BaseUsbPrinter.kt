@@ -3,7 +3,6 @@ package com.eiviayw.print.gprinter
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.os.Handler
 import android.text.TextUtils
 import com.eiviayw.print.base.BaseMission
 import com.eiviayw.print.bean.Result
@@ -11,10 +10,8 @@ import com.eiviayw.print.bean.mission.GraphicMission
 import com.eiviayw.print.bean.mission.command.GPrinterMission
 import com.gprinter.bean.PrinterDevices
 import com.gprinter.io.UsbPort
-import com.gprinter.utils.CallbackListener
 import com.gprinter.utils.Command
 import com.gprinter.utils.ConnMethod
-import kotlinx.coroutines.delay
 
 /**
  * Created with Android Studio.
