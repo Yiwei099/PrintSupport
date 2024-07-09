@@ -301,34 +301,35 @@ override fun onUsbAttached(intent: Intent) {
 ```
 
 ### 4. 已定义的错误码汇总(逻辑自定义和SDK定义)
+|错误码|解释|
 |--|--|
-|0|通用成功
-|-1|通用异常(未知原因)
-|-2|连接失败
-|-3|连接异常
-|-4|打印失败
-|-5|打印异常
-|-6|断开连接异常
-|-7|Automatic recovery error occurred
-|-8|Cover open error occurred(盖子未关闭)
-|-9|Auto cutter error occurred(切纸异常)
-|-10|Mechanical error occurred(打印机机械错误)
-|-11|No paper is left in the roll paper end detector(未检测到打印纸)
-|-12|Unrecoverable error occurred
-|-13|Error exists in the requested document syntax
-|-14|Printer specified by the device ID does not exist.(找不到打印机)
-|-15|Error occurred with the printing system
-|-16|Error was detected with the communication port
-|-17|Print timeout occurred.(超时)
-|-18|Specified print job ID does not exist
-|-19|Print queue is full.
-|-20|Battery has run out.(电量低)
-|-21|The number of print jobs sent to the printer has exceeded the allowable limit
-|-22|The size of the print job data exceeds the capacity of the printer
-|-23|rint command sent while waiting for paper removal
-|-24|图像任务尺寸异常
-|-25|没有权限
-|-26|指令异常
+|0|通用成功|
+|-1|通用异常(未知原因)|
+|-2|连接失败|
+|-3|连接异常|
+|-4|打印失败|
+|-5|打印异常|
+|-6|断开连接异常|
+|-7|Automatic recovery error occurred|
+|-8|Cover open error occurred(盖子未关闭)|
+|-9|Auto cutter error occurred(切纸异常)|
+|-10|Mechanical error occurred(打印机机械错误)|
+|-11|No paper is left in the roll paper end detector(未检测到打印纸)|
+|-12|Unrecoverable error occurred|
+|-13|Error exists in the requested document syntax|
+|-14|Printer specified by the device ID does not exist.(找不到打印机)|
+|-15|Error occurred with the printing system|
+|-16|Error was detected with the communication port|
+|-17|Print timeout occurred.(超时)|
+|-18|Specified print job ID does not exist|
+|-19|Print queue is full|
+|-20|Battery has run out.(电量低)|
+|-21|The number of print jobs sent to the printer has exceeded the allowable limit|
+|-22|The size of the print job data exceeds the capacity of the printer|
+|-23|rint command sent while waiting for paper removal|
+|-24|图像任务尺寸异常|
+|-25|没有权限|
+|-26|指令异常|
 
 
 ### 4. 联系我
