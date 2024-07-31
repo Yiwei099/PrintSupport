@@ -1,5 +1,11 @@
 # PrintSupport(专注于 **收据** 与 **标签** 的打印工具)
 
+![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/mipmap-hdpi/ic_launcher.png)
+
+## 重要提示
+> 本仓库于 2024-08-01 起不再维护测试用例，只维护打印支持库的功能，请下载调试App进行调试  
+> 调试App下载地址：[全能打印管家.apk](https://github.com/Yiwei099/PrintSupport/blob/master/%E5%85%A8%E8%83%BD%E6%89%93%E5%8D%B0%E7%AE%A1%E5%AE%B6_v1.0.0.apk)
+
 ## 概述
 > ① 集成多个品牌打印机的SDK：GPrinter(佳博)，Epson(爱普森)，Bixolon(必胜龙)，StarX(待接入)  
 > ② 已调试支持的打印机品牌：GPrinter(佳博)，Epson(爱普森)，Bixolon(必胜龙)，XPrinter(芯烨)，Element(元素)  
