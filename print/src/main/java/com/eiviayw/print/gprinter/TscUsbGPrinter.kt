@@ -17,7 +17,8 @@ class TscUsbGPrinter(
     private val mContext: Context,
     private val vID: Int,
     private val pID: Int,
-    private val serialNumber: String = ""
+    private val serialNumber: String = "",
+    private val density:LabelCommand.DENSITY = LabelCommand.DENSITY.DNESITY0
 ) :BaseUsbPrinter("GPrinterTsc：$vID-$pID-$serialNumber"){
     override fun commandType(): Command = Command.TSC
 
@@ -28,4 +29,6 @@ class TscUsbGPrinter(
     override fun getDevicePID(): Int = pID
 
     override fun getDeviceSerialNumber(): String = serialNumber
+
+    override fun getLabelDensity(): LabelCommand.DENSITY = density
 }

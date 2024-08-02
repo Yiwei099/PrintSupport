@@ -335,14 +335,14 @@ class NativeUsbPrinter(
     }
 
     private fun sendTscDataByGraphicParam(param: GraphicMission): Result {
-        if (param.bitmapWidth == 0 || param.bitmapHeight == 0) {
+        if (!param.selfAdaptionHeight && (param.bitmapWidth == 0 || param.bitmapHeight == 0)) {
             return Result(Result.BITMAP_SIZE_ERROR)
         }
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val command = LabelCommand().apply {
             addSize(param.bitmapWidth, param.bitmapHeight)
             addDirection(
-                LabelCommand.DIRECTION.BACKWARD,
+                if (param.isBackForward()) LabelCommand.DIRECTION.BACKWARD else LabelCommand.DIRECTION.FORWARD,
                 LabelCommand.MIRROR.NORMAL
             )
             addDensity(density)
