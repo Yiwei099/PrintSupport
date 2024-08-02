@@ -20,6 +20,7 @@ class GraphicMission(
     val cutBitmap:Boolean = true,//是否需要切割图像(分段发送)
     var bitmapWidth:Int = 0,//图像宽度
     val selfAdaptionHeight:Boolean = true,//是否自适应高度：true=自适应；false=固定高度
+    val forward:Int = 0,//标签方向 0 向前， 1向后
 ) : BaseMission() {
 
     /**
@@ -31,5 +32,5 @@ class GraphicMission(
         return "GraphicParam(bitmapHeight=$bitmapHeight, onceLength=$onceLength, criticalHeight=$criticalHeight, graphicQuality=$graphicQuality,${super.toString()}"
     }
 
-
+    fun isBackForward() = forward == 1
 }

@@ -346,15 +346,18 @@ abstract class BaseGPrinter(tag: String) : BasePrinter(tag = tag), PrinterInterf
     }
 
     private fun sendTscDataByGraphicParam(param: GraphicMission): Result {
-        if (param.bitmapWidth == 0 || param.bitmapHeight == 0){
+        if (!param.selfAdaptionHeight && (param.bitmapWidth == 0 || param.bitmapHeight == 0)){
+            //固定高度但没有设置尺寸
             return Result(Result.BITMAP_SIZE_ERROR)
         }
         val dataBitmap = BitmapFactory.decodeByteArray(param.bitmapData, 0, param.bitmapData.size)
         val result = Result()
         val command = LabelCommand().apply {
-            addSize(param.bitmapWidth,param.bitmapHeight)
+            if (!param.selfAdaptionHeight){
+                addSize(param.bitmapWidth,param.bitmapHeight)
+            }
             addDirection(
-                LabelCommand.DIRECTION.BACKWARD,
+                if (param.isBackForward()) LabelCommand.DIRECTION.BACKWARD else LabelCommand.DIRECTION.FORWARD,
                 LabelCommand.MIRROR.NORMAL
             )
             addDensity(getLabelDensity())
