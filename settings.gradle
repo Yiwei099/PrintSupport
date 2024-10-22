@@ -23,3 +23,7 @@ dependencyResolutionManagement {
 rootProject.name = "PrintSupport"
 //include ':app'
 include ':print'
+include ':libcommon'
+include ':libepson'
+include ':libgprinter'
+include ':libbixolon'

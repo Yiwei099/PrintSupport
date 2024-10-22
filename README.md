@@ -3,6 +3,16 @@
 ## 重要提示
 > 本仓库于 2024-08-01 起不再维护测试用例，只维护 Library 的功能  
 > 查阅或使用演示App：[UniversalPrinter](https://github.com/Yiwei099/UniversalPrinter)
+> 
+> 2024-10-22：国内大多数情况下使用佳博的SDK就可以满足需求，所以从 1.3.0 起对本库进行了组件化拆包，使用其它品牌的 SDK 也是按需添加依赖即可
+
+## 组件化分包罗列
+| 包名 | 描述 | 依赖方式 |
+|---|----|--------|
+| PrintSupport-GPrinter | 佳博 |
+| PrintSupport-Epson | 爱普森 |
+| PrintSupport-Bixolon | 必胜龙 |
+| PrintSupport | 总包(佳博，爱普森，必胜龙) |
 
 ## 概述
 > ① 集成多个品牌打印机的SDK：GPrinter(佳博)，Epson(爱普森)，Bixolon(必胜龙)，StarX(待接入)  
@@ -337,6 +347,6 @@ override fun onUsbAttached(intent: Intent) {
 
 
 ### 4. 联系我
-![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/wechat_qr_code.png)
+![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/we_chat.jpg)
 
 ## Print support by android(不定期更新)  
