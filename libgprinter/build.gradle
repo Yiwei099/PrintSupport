@@ -14,6 +14,13 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        //添加ndk配置，否则so打不进去
+        ndk {
+            //选择要添加的对应 cpu 类型的 .so 库。
+            abiFilters 'armeabi','armeabi-v7a','arm64-v8a',"x86","x86_64"
+            // 还可以添加 'mips', 'mips64'
+        }
     }
 
     buildTypes {
