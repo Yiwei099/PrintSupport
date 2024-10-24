@@ -45,7 +45,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.eiviayw'
-                artifactId = 'PrintSupport-Common'
+                artifactId = 'PrintSupportCommon'
                 version = '1.3.0'
             }
         }
