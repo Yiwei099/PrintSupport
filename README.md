@@ -9,11 +9,11 @@
 ## 组件化分包罗列
 | 包名 | 描述             | 依赖方式                                                       |
 |---|----------------|------------------------------------------------------------|
-| PrintSupport-GPrinter | 佳博 | com.github.Yiwei099.PrintSupport:GPrinter:$releaseVersion  |
-| PrintSupport-Epson | 爱普森 | com.github.Yiwei099.PrintSupport:Epson:$releaseVersion     |
-| PrintSupport-Bixolon | 必胜龙 | com.github.Yiwei099.PrintSupport:Bixolon:$releaseVersion   |
+| GPrinter | 佳博 | com.github.Yiwei099.PrintSupport:GPrinter:$releaseVersion  |
+| Epson | 爱普森 | com.github.Yiwei099.PrintSupport:Epson:$releaseVersion     |
+| Bixolon | 必胜龙 | com.github.Yiwei099.PrintSupport:Bixolon:$releaseVersion   |
 | PrintSupport | 总包(佳博，爱普森，必胜龙) | com.github.Yiwei099.PrintSupport:$releaseVersion           |
-| PrintSupport | 基础包 | com.github.Yiwei099.PrintSupport:libcommon:$releaseVersion |
+| libcommon | 基础包 | com.github.Yiwei099.PrintSupport:libcommon:$releaseVersion |
 
 ## 概述
 > ① 集成多个品牌打印机的SDK：GPrinter(佳博)，Epson(爱普森)，Bixolon(必胜龙)，StarX(待接入)  
