@@ -56,7 +56,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.eiviayw'
-                artifactId = 'PrintSupport-Epson'
+                artifactId = 'Epson'
                 version = '1.3.0'
             }
         }

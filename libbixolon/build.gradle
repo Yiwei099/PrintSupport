@@ -56,7 +56,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.eiviayw'
-                artifactId = 'PrintSupport-Bixolon'
+                artifactId = 'Bixolon'
                 version = '1.3.0'
             }
         }

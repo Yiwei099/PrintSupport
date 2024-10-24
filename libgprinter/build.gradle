@@ -29,6 +29,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     sourceSets {
         main {
             jni.srcDirs = []
@@ -56,7 +57,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.eiviayw'
-                artifactId = 'PrintSupport-GPrinter'
+                artifactId = 'GPrinter'
                 version = '1.3.0'
             }
         }
