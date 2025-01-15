@@ -1,5 +1,7 @@
 # PrintSupport(专注于 **收据** 与 **标签** 的打印工具)
 
+> [ReadMe_EN.md](https://github.com/Yiwei099/PrintSupport/blob/master/Readme_EN.md)
+
 ## 重要提示
 > 本仓库于 2024-08-01 起不再维护测试用例，只维护 Library 的功能  
 > 查阅或使用演示App：[UniversalPrinter](https://github.com/Yiwei099/UniversalPrinter)
