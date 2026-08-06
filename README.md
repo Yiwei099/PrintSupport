@@ -348,8 +348,4 @@ override fun onUsbAttached(intent: Intent) {
 |-25|没有权限|
 |-26|指令异常|
 
-
-### 4. 联系我
-![Image Text](https://github.com/Yiwei099/DrawingSupport/blob/master/app/src/main/res/drawable/we_chat.jpg)
-
 ## Print support by android(不定期更新)  
