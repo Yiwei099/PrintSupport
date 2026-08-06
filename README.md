@@ -249,7 +249,4 @@ override fun onUsbAttached(intent: Intent) {
 }
 ```
 
-### 4. 联系我
-![Image Text](https://github.com/Yiwei099/PrintSupport/blob/master/app/src/main/res/drawable/wechat_qr_code.png)
-
 ## Print support by android(不定期更新)  
